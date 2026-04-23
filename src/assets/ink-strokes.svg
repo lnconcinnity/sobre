@@ -1,0 +1,14 @@
+<svg viewBox="0 0 321 626" xmlns="http://www.w3.org/2000/svg" class="brush-container">
+  <defs>
+    <filter id="rough-edge">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="4" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" />
+    </filter>
+  </defs>
+
+  <g filter="url(#rough-edge)">
+    <path class="brush-path" d="M40 0V400C40 510 115 600 226 600H321" stroke-width="80" fill="none" stroke-linecap="round" />
+    <path class="brush-path" d="M85 0V400C85 490 143 560 226 560H321" stroke-width="80" fill="none" stroke-linecap="round" />
+    <path class="brush-path" d="M130 0V400C130 460 170 510 226 510H321" stroke-width="80" fill="none" stroke-linecap="round" />
+  </g>
+</svg>
