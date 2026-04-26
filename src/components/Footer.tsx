@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
 import { useTransition } from "../hooks/useTransition";
 
@@ -29,10 +28,9 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold uppercase text-[10px] tracking-[0.2em] text-mint-light mb-6">Navigation</h4>
                         <ul className="space-y-4 text-sm font-medium text-white/70">
-                            <li><button onClick={() => startTransition("/company")} className="hover:text-mint-light transition-colors magnetic">Our Story</button></li>
-                            <li><button onClick={() => startTransition("/resources")} className="hover:text-mint-light transition-colors magnetic">Resources</button></li>
-                            <li><button onClick={() => startTransition("/forum")} className="hover:text-mint-light transition-colors magnetic">Student Forum</button></li>
-                            <li><button onClick={() => startTransition("/careers")} className="hover:text-mint-light transition-colors magnetic">Careers</button></li>
+                            <li><button onClick={() => startTransition("/company")} className="cursor-pointer hover:text-mint-light transition-colors magnetic">Our Story</button></li>
+                            <li><button onClick={() => startTransition("/forum")} className="cursor-pointer hover:text-mint-light transition-colors magnetic">Student Forum</button></li>
+                            <li><button onClick={() => startTransition("/careers")} className="cursor-pointer hover:text-mint-light transition-colors magnetic">Careers</button></li>
                         </ul>
                     </div>
 
@@ -41,7 +39,7 @@ export default function Footer() {
                         <ul className="space-y-4 text-sm font-medium text-white/70">
                             <li><a href="mailto:sobre.co@gmail.com" className="hover:text-mint-light transition-colors magnetic">sobre.co@gmail.com</a></li>
                             <li className="text-white/40 font-normal">+63 963 412 9856</li>
-                            <li><button onClick={() => startTransition("/privacy")} className="hover:text-mint-light transition-colors magnetic">Privacy Policy</button></li>
+                            <li><button onClick={() => startTransition("/privacy")} className="cursor-pointer hover:text-mint-light transition-colors magnetic">Privacy Policy</button></li>
                         </ul>
                     </div>
                 </div>

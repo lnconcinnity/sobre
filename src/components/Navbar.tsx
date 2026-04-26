@@ -9,18 +9,19 @@ import { useTransition } from "../hooks/useTransition";
 
 const NAV_LINKS = [
     { label: "Company", href: "/company" },
-    { label: "Resources", href: "/resources" },
     { label: "Forum", href: "/forum" },
     { label: "Careers", href: "/careers" },
+    { label: "Contact", href: "/contact" },
 ];
 
-const VALID_ROUTES = [...NAV_LINKS.map(link => link.href), "/"];
+const VALID_ROUTES = [...NAV_LINKS.map(link => link.href), "/", "/search"];
+const HIDDEN_NAV_AT_ROUTES = new Set(["/", "/search"]);
 
 export default function Navbar() {
     const navRef = useRef(null);
     const pathname = usePathname();
     const isHeroVisible = useNavStore((state) => state.isHeroVisible);
-    const shouldShow = VALID_ROUTES.includes(pathname) && (pathname !== "/" || !isHeroVisible);
+    const shouldShow = VALID_ROUTES.includes(pathname) && (!HIDDEN_NAV_AT_ROUTES.has(pathname) || !isHeroVisible);
     const { startTransition }= useTransition();
     useGSAP(() => {
         gsap.to(navRef.current, { 
@@ -42,6 +43,10 @@ export default function Navbar() {
         if (href === pathname) return;
         startTransition(href);
     }
+    const execSearch = (q: string) => {
+        if (!q.trim()) return;
+        startTransition(`/search?q=${encodeURIComponent(q.trim())}`);
+    };
 
     return (
         <nav 
@@ -68,7 +73,7 @@ export default function Navbar() {
                 ))}
             </div>
 
-            <SearchDropdown label="Search..." name="nav-search" variant="lean" />
+            <SearchDropdown label="Search..." name="nav-search" variant="lean" onSearch={(q) => execSearch(q)} />
         </nav>
     );
 }

@@ -6,6 +6,7 @@ import BlobCursor from "../components/BlobCursor";
 import Navbar from "../components/Navbar";
 import TransitionProvider from "../providers/TransitionProvider";
 import Footer from "../components/Footer";
+import { AuthProvider } from "../providers/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,14 +28,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en" className="overscroll-none no-scrollbar">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden no-scrollbar select-none bg-[#f9fdf9]`}>
-                <TransitionProvider>
-                    <BlobCursor />
-                    <Navbar />
-                    <SmoothScroller>
-                        {children}
-                        <Footer />
-                    </SmoothScroller>
-                </TransitionProvider>
+                <AuthProvider>
+                    <TransitionProvider>
+                        <BlobCursor />
+                        <Navbar />
+                        <SmoothScroller>
+                            {children}
+                            <Footer />
+                        </SmoothScroller>
+                    </TransitionProvider>
+                </AuthProvider>
             </body>
         </html>
     );

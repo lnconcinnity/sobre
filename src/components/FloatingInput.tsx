@@ -3,11 +3,13 @@
 interface FloatingInputProps {
     label: string;
     name: string;
+    value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     children?: React.ReactNode;
 }
 
-export default function FloatingInput({ label, name, onChange, children }: FloatingInputProps) {
+export default function FloatingInput({ label, name, onChange, value, onKeyDown, children }: FloatingInputProps) {
     return (
         <div className="locked magnetic relative mt-6 group w-full max-w-md">
             <div className="relative overflow-hidden border-b border-black/10 transition-all duration-500 focus-within:border-mint-dark">
@@ -15,6 +17,8 @@ export default function FloatingInput({ label, name, onChange, children }: Float
                     type="text"
                     name={name}
                     id={name}
+                    value={value}
+                    onKeyDown={onKeyDown}
                     placeholder=" " 
                     onChange={onChange}
                     className="peer block w-full px-0 pt-4 pb-1 text-base bg-transparent border-none appearance-none focus:outline-none focus:ring-0 transition-all"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { TransitionContext } from "../hooks/useTransition";
 import gsap, { SplitText, useGSAP } from "../modules/gsap";
@@ -17,7 +18,8 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
     const splashOutlineRef = useRef<HTMLSpanElement | null>(null);
     const splashFillRef = useRef<HTMLSpanElement | null>(null);
     const [introCompleted, setIntroCompleted] = useState(false);
-    
+    const smootherRef = useRef<any | null>(null);
+
     const router = useRouter();
     const pathname = usePathname();
     const isIndexPage = pathname === "/";
@@ -27,10 +29,13 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
         return totalTimeBeforeWipeEnd;
     }, []);
     const totalDuration = useMemo(() => (delay/2 + baseIntroTime + duration/2), [duration, delay, baseIntroTime]);
+
     useGSAP(() => {
         let splitterFill: SplitText | undefined;
         let splitterOutline: SplitText | undefined;
         
+        if (smootherRef.current) smootherRef.current.scrollTo(0, false);
+
         const tl = gsap.timeline({
             onComplete: () => {
                 gsap.set(overlayRef.current, { pointerEvents: 'none' });
@@ -101,6 +106,7 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
         }
     }, [pathname, isIndexPage, duration]);
 
+    const getSmootherInstance = (instance: any) => smootherRef.current = instance;
     const startTransition = (href: string) => {
         if (!overlayRef.current) {
             router.push(href);
@@ -120,7 +126,7 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
     };
 
     return (
-        <TransitionContext.Provider value={{ startTransition, totalDuration }}>
+        <TransitionContext.Provider value={{ startTransition, totalDuration, _setSmootherInstance: getSmootherInstance }}>
             <div 
                 ref={overlayRef} 
                 className="fixed inset-0 size-full bg-[#263127] z-99999 grid place-items-center"
