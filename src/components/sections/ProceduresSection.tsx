@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import gsap, { useGSAP } from "../../modules/gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useTransition } from "@/src/hooks/useTransition";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,6 +32,7 @@ const proceduresList = [
 function ProcessSection({ proc, index }: { proc: typeof proceduresList[0], index: number }) {
     const container = useRef(null);
     const imgRef = useRef(null);
+    const { startTransition } = useTransition();
 
     useGSAP(() => {
         gsap.to(imgRef.current, {
@@ -88,7 +90,7 @@ function ProcessSection({ proc, index }: { proc: typeof proceduresList[0], index
                     {proc.description}
                 </p>
 
-                <button className="cursor-pointer magnetic group self-start flex items-center gap-4 text-white uppercase tracking-widest text-xs font-bold border border-white/20 px-8 py-4 rounded-full hover:bg-white hover:text-black transition-colors">
+                <button onClick={() => startTransition("/contact")} className="cursor-pointer magnetic group self-start flex items-center gap-4 text-white uppercase tracking-widest text-xs font-bold border border-white/20 px-8 py-4 rounded-full hover:bg-white hover:text-black transition-colors">
                     <span>Inquire Now</span>
                     <svg className="w-4 h-4 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -100,6 +102,7 @@ function ProcessSection({ proc, index }: { proc: typeof proceduresList[0], index
 }
 
 export default function ProceduresSection() {
+    const { startTransition } = useTransition();
     return (
         <section className="relative bg-[#263127]">
             <div className="flex flex-col">
@@ -112,7 +115,7 @@ export default function ProceduresSection() {
                 <h4 className="text-2xl md:text-4xl font-black uppercase mb-8">
                     Ready to <span className="italic text-transparent" style={{ WebkitTextStroke: "1px black" }}>pave your path?</span>
                 </h4>
-                <button className="magnetic cursor-pointer px-12 py-6 bg-mint-dark text-white rounded-full font-black uppercase tracking-widest text-sm shadow-xl shadow-mint-dark/20">
+                <button onClick={() => startTransition("/contact")} className="magnetic cursor-pointer px-12 py-6 bg-mint-dark text-white rounded-full font-black uppercase tracking-widest text-sm shadow-xl shadow-mint-dark/20">
                     Get Started Today
                 </button>
             </div>
