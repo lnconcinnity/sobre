@@ -10,7 +10,7 @@ import { useTransition } from "../hooks/useTransition";
 const NAV_LINKS = [
     { label: "Company", href: "/company" },
     { label: "Forum", href: "/forum" },
-    { label: "Careers", href: "/careers" },
+    // { label: "Careers", href: "/careers" },
     { label: "Contact", href: "/contact" },
 ];
 
