@@ -2,7 +2,6 @@
 import Image from "next/image";
 
 export const UniversityCard = ({ item, narrative }: { item: any, narrative: any }) => {
-    console.log(item, narrative)
     return (
         <div className="locked magnetic glass-panel group relative h-[75vh] overflow-hidden rounded-4xl bg-neutral-900 border border-white/10 shadow-sm transition-all duration-500 hover:shadow-2xl">
             <div className="absolute inset-0 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out">

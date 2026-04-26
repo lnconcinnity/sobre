@@ -13,7 +13,7 @@ interface SearchDropdownProps {
 }
 
 const DropdownItem = ({ icon, label, category, onClick }: { icon: string, label: string, category: string, onClick: () => void }) => (
-    <button onClick={onClick} className="locked magnetic group flex items-center justify-between p-3 hover:bg-mint-light/10 transition-all cursor-pointer rounded-lg">
+    <button onClick={onClick} className="locked magnetic relative group flex items-center justify-between p-3 hover:bg-mint-light/10 transition-all cursor-pointer rounded-lg">
         <div className="flex items-center gap-3">
             <span className="text-lg opacity-50 group-hover:opacity-100 transition-opacity">{icon}</span>
             <span className="text-sm font-medium text-neutral-700">{label}</span>
