@@ -9,56 +9,67 @@ const teamMembers = [
         name: "Gian Dwayne Romero",
         role: "Chairman",
         roster: "/company-roster/romero.png",
+        bio: "The chief architect of Sobre's strategic vision. He oversees the totality of company pipelines, ensuring every operational thread is woven into a singular, cohesive executive direction."
     },
     {
         name: "Zacci Pedrigal",
         role: "Vice Chairman",
         roster: "/company-roster/pedrigal.png",
+        bio: "Spearheading external growth and institutional partnerships. She bridges the gap between internal strategy and global outreach, managing the vital flow of communication with the outside world."
     },
     {
         name: "Daniel Jose Bartolo",
         role: "Financial Manager",
         roster: "/company-roster/bartolo.png",
+        bio: "The custodian of Sobre's fiscal integrity. He meticulously audits resources and monitors revenue streams to ensure the firm's economic foundation remains robust and sustainable."
     },
     {
         name: "Mark Joseph De Luna",
         role: "Human Resources Manager",
         roster: "/company-roster/deluna.png",
+        bio: "The guardian of company ethos. He cultivates a culture of excellence and high morale, fostering healthy relationships across the organizational hierarchy to keep the collective spirit steady."
     },
     {
         name: "David Clark Raagas",
         role: "Head of Operations",
         roster: "/company-roster/raagas.png",
+        bio: "The engine of efficiency. Under his oversight, day-to-day logistics are refined into a high-performance workflow, guaranteeing that every service delivered meets the Sobre standard of quality."
     },
     {
         name: "Laurence Jake Cayabyab",
         role: "Head of Affairs",
         roster: "/company-roster/cayabyab.png",
+        bio: "The master of diplomacy and relations. He ensures that every interaction with clients, affiliates, and partners is handled with professional decency and modest, high-level communication."
     },
     {
         name: "Levian Ryel Banot",
         role: "Head of Marketing",
         roster: "/company-roster/banot.png",
+        bio: "The voice of the brand. He orchestrates promotional narratives and content distribution, expanding the firm's presence and ensuring the 'Sobre' story resonates with a vast, global audience."
     },
     {
         name: "Agiellos Lyeojandro Biscocho",
         role: "Head Clientele Agent",
         roster: "/company-roster/biscocho.png",
+        bio: "Leading the front-line engagement. He manages the firm's clientele en masse, ensuring rapid response times and maintaining the highest standard of service for our diverse subscriber base."
     },
     {
         name: "Jearvin Marcy Kabigting",
         role: "Clientele Agent",
         roster: "/company-roster/kabigting.png",
+        bio: "Dedicated to hyper-local engagement. He processes regional-based requests with precision, providing tailored referrals and recommendations that align with local institutional nuances."
     },
     {
         name: "Clarence Benedict Gersava",
         role: "Field Supervisor",
         roster: "/company-roster/gersava.png",
+        bio: "The analytical eye on the ground. He monitors regional logistics and daily activities, ensuring that the company's operational reach is managed with unwavering attention to detail."
     },
     {
         name: "Jeremie Garcia",
         role: "Field Supervisor",
         roster: "/company-roster/garcia.png",
+        bio: "A strategic overseer of field operations. He manages the grinding daily activities of the firm's pipelines, ensuring regional logistical consistency across all service territories."
     },
 ]
 
@@ -189,7 +200,7 @@ export default function CompanyPage() {
                                 <div className="absolute inset-x-0 bottom-0 p-8 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-neutral-950/90 backdrop-blur-xl border-t border-white/10 h-40 flex flex-col justify-center">
                                     <p className="text-[10px] font-bold text-mint-light uppercase mb-3 tracking-widest">Profile Abstract</p>
                                     <p className="text-xs text-neutral-300 leading-relaxed font-medium">
-                                        Commitment to delivering professional, holistic, and personal services tailored to individual student profiles to simplify complex academic pathways.
+                                        {member.bio}
                                     </p>
                                 </div>
                             </div>
