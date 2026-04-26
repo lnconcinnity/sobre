@@ -4,10 +4,10 @@ import { TransitionContext } from "../hooks/useTransition";
 import gsap, { SplitText, useGSAP } from "../modules/gsap";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { ReactNode, useMemo, useRef, useState } from "react";
+import { ReactNode, useMemo, useRef, useState, useCallback } from "react";
 
 const FADE_OUT_OFFSET = 0.35;
-const TEXT_DURATION = 0.5
+const TEXT_DURATION = 0.5;
 const TEXT_FADE_DURATION = 0.3;
 const TEXT_PAUSE = 0.2;
 const WIPE_OVERLAP = -0.2;
@@ -23,36 +23,42 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
     const router = useRouter();
     const pathname = usePathname();
     const isIndexPage = pathname === "/";
+    
     const baseIntroTime = useMemo(() => {
         const textEnd = FADE_OUT_OFFSET + TEXT_DURATION + TEXT_PAUSE + TEXT_FADE_DURATION;
-        const totalTimeBeforeWipeEnd = textEnd + WIPE_OVERLAP + WIPE_INTERNAL_DELAY;
-        return totalTimeBeforeWipeEnd;
+        return textEnd + WIPE_OVERLAP + WIPE_INTERNAL_DELAY;
     }, []);
-    const totalDuration = useMemo(() => (delay/2 + baseIntroTime + duration/2), [duration, delay, baseIntroTime]);
+    
+    const totalDuration = useMemo(() => (delay / 2 + baseIntroTime + duration / 2), [duration, delay, baseIntroTime]);
 
-    useGSAP(() => {
-        let splitterFill: SplitText | undefined;
-        let splitterOutline: SplitText | undefined;
+    const playExitAnimation = useCallback(() => {
+        if (!overlayRef.current) return;
+        gsap.killTweensOf(overlayRef.current);
+        gsap.set(overlayRef.current, { pointerEvents: 'auto' });
         
-        if (smootherRef.current) smootherRef.current.scrollTo(0, false);
-
         const tl = gsap.timeline({
             onComplete: () => {
                 gsap.set(overlayRef.current, { pointerEvents: 'none' });
             }
         });
 
-        if (isIndexPage) {
+        if (isIndexPage && !introCompleted) {
+            let splitterFill: SplitText | undefined;
+            let splitterOutline: SplitText | undefined;
+            
             const TEXT_APPEAR_END_TIME = delay + FADE_OUT_OFFSET + TEXT_DURATION;
             const TEXT_FADE_START_TIME = TEXT_APPEAR_END_TIME + TEXT_PAUSE;
             const WIPE_START_TIME = TEXT_FADE_START_TIME + TEXT_FADE_DURATION + WIPE_OVERLAP;
+
             if (splashFillRef.current && splashOutlineRef.current) {
                 gsap.set([splashFillRef.current, splashOutlineRef.current], { visibility: "visible" });
                 splitterFill = new SplitText(splashFillRef.current, { type: "chars" });
                 splitterOutline = new SplitText(splashOutlineRef.current, { type: "chars" });
                 const allChars = [...splitterFill.chars, ...splitterOutline.chars];
-                document.body.style.overflow = "hidden"
+                
+                document.body.style.overflow = "hidden";
                 gsap.set(allChars, { opacity: 0 });
+
                 tl.fromTo(splitterOutline.chars, 
                     { yPercent: -50, opacity: 0 }, 
                     {
@@ -76,51 +82,54 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
                     duration: TEXT_FADE_DURATION,
                     stagger: { each: 0.01, from: "start" },
                 }, TEXT_FADE_START_TIME)
-                    .to(overlayRef.current, {
+                .to(overlayRef.current, {
                     xPercent: 100,
                     duration: duration,
                     ease: "power3.in",
                     delay: WIPE_INTERNAL_DELAY,
                     onComplete: () => {
-                        if (splitterFill) splitterFill.revert();
-                        if (splitterOutline) splitterOutline.revert();
+                        splitterFill?.revert();
+                        splitterOutline?.revert();
                         document.body.style.overflow = "auto";
                         setIntroCompleted(true);
                     }
-                }, WIPE_START_TIME)
-            } else standardExitAnimation(tl, duration, delay);
-        } else standardExitAnimation(tl, duration, delay);
+                }, WIPE_START_TIME);
+            } else {
+                tl.to(overlayRef.current, { xPercent: 100, duration, ease: "power3.inOut", delay });
+            }
+        } else {
+            tl.to(overlayRef.current, { xPercent: 100, duration, ease: "power3.inOut", delay });
+        }
+    }, [isIndexPage, duration, delay, introCompleted]);
 
-        function standardExitAnimation(timeline: gsap.core.Timeline, duration: number, delay: number) {
-            timeline.to(overlayRef.current, {
-                xPercent: 100,
-                duration: duration,
-                ease: "power3.inOut",
-                delay: delay,
-            });
-        }
-        
-        return () => {
-            if (splitterFill) splitterFill.revert();
-            if (splitterOutline) splitterOutline.revert();
-        }
-    }, [pathname, isIndexPage, duration]);
+    useGSAP(() => {
+        if (smootherRef.current) smootherRef.current.scrollTo(0, false);
+        playExitAnimation();
+    }, [pathname, playExitAnimation]);
 
     const getSmootherInstance = (instance: any) => smootherRef.current = instance;
+
     const startTransition = (href: string) => {
         if (!overlayRef.current) {
             router.push(href);
             return;
         }
+
+        const isSamePage = pathname === href.split('?')[0];
+        
         gsap.set(overlayRef.current, { pointerEvents: 'auto', xPercent: -100 });
-        document.body.style.overflow = "hidden"
+        document.body.style.overflow = "hidden";
+
         gsap.to(overlayRef.current, {
             xPercent: 0,
             duration: duration,
             ease: "power3.inOut",
             onComplete: () => {
                 router.push(href);
-                document.body.style.overflow = "auto"
+                if (isSamePage) {
+                    playExitAnimation();
+                }
+                document.body.style.overflow = "auto";
             }
         });
     };

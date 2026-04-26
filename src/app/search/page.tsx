@@ -7,12 +7,15 @@ import { ProgramAccordion } from "@/src/components/ProgramAccordion";
 import { UniversityCard } from "@/src/components/UniversityCard";
 import { useNavStore } from "@/src/store/useNavStore";
 import { useInView } from "@/src/hooks/useInView";
+import SearchDropdown from "@/src/components/SearchDropdown";
+import { useTransition } from "@/src/hooks/useTransition";
 
 export default function SearchPage() {
+    const { startTransition } = useTransition();
     const searchParams = useSearchParams();
     const query = searchParams.get("q");
     const setHeroVisible = useNavStore((state) => state.setHeroVisible);
-    const [resultsContainer, inView] = useInView({ threshold: 0.7, });
+    const [resultsContainer, inView] = useInView({ threshold: 0.9, });
     
     const [status, setStatus] = useState(0); // -1=err, 0=idle, 1=search, 2=reason, 3=done, 4=none
     const [results, setResults] = useState<any[]>([]);
@@ -35,7 +38,15 @@ export default function SearchPage() {
         const runPipeline = async () => {
             try {
                 setStatus(1);
-                fetch("/api/analytics/log", { method: "POST", body: JSON.stringify({ query }) });
+                const analyticsRes = await fetch("/api/analytics/log", { 
+                    method: "POST", 
+                    body: JSON.stringify({ query }) 
+                });
+                const analyticsData = await analyticsRes.json();
+                if (analyticsData.status === "ignored" || analyticsData.status === "rejected") {
+                    setStatus(4);
+                    return; 
+                }
 
                 const searchRes = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
                 const searchData = await searchRes.json();
@@ -136,8 +147,13 @@ export default function SearchPage() {
         }, "-=0.8");
     }, { scope: universitiesContainerRef });
 
+    const execSearch = (q: string) => {
+        if (!q.trim()) return;
+        startTransition(`/search?q=${encodeURIComponent(q.trim())}`);
+    }
+
     return (
-        <div className="relative min-h-screen bg-neutral-50" ref={resultsContainer}>
+        <div key={query} className="relative min-h-screen bg-neutral-50" ref={resultsContainer}>
             {status === -1 && (
                 <div className="h-screen flex flex-col items-center justify-center gap-4">
                     <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">
@@ -146,6 +162,17 @@ export default function SearchPage() {
                     <p className="text-neutral-400 text-sm font-medium italic">
                         Please try again later or rephrase your query.
                     </p>
+                </div>
+            )}
+            {status === 4 && (
+                <div className="h-screen flex flex-col items-center justify-center gap-4 **:transition-none">
+                    <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">
+                        We couldn&apos;t make sense of that!
+                    </h2> 
+                    <p className="text-neutral-400 text-sm font-medium italic">
+                        Try searching for a specific degree, program, or university.
+                    </p>
+                    <SearchDropdown label="Search..." name="nav-search" onSearch={(q) => execSearch(q)} />
                 </div>
             )}
             {(status < 3 && status !== -1 && status !== 4) || status === 3 ? (

@@ -80,9 +80,10 @@ export default function SearchDropdown({
                 className={`absolute top-full left-0 mt-2 bg-white/90 backdrop-blur-xl border border-black/5 shadow-2xl rounded-2xl p-2 z-120 overflow-hidden opacity-0 shadow-mint-dark/5 
                     ${variant === 'lean' ? 'w-70 -left-10' : 'w-full'}`}
             >
+                {suggestions.length > 0 ? (
                 <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-neutral-400 border-b border-black/5 mb-2 font-bold">
                     Trending Now
-                </div>
+                </div>) : null}
 
                 <div className="flex flex-col gap-1">
                     {suggestions.length > 0 ? (
