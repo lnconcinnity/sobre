@@ -11,7 +11,7 @@ export default function ContactPage() {
                     </span>
                     <h1 className="text-7xl md:text-8xl font-black text-black uppercase leading-none tracking-tighter">
                         Let&apos;s talk <br /> 
-                        <span className="text-neutral-300">strategy.</span>
+                        <span className="text-mint-dark">strategy.</span>
                     </h1>
                 </div>
 

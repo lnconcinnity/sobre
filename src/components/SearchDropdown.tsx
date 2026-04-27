@@ -16,7 +16,7 @@ const DropdownItem = ({ icon, label, category, onClick }: { icon: string, label:
     <button onClick={onClick} className="locked magnetic relative group flex items-center justify-between p-3 hover:bg-mint-light/10 transition-colors cursor-pointer rounded-lg">
         <div className="flex items-center gap-3">
             <span className="text-lg opacity-50 group-hover:opacity-100 transition-opacity">{icon}</span>
-            <span className="text-sm font-medium text-neutral-700">{label}</span>
+            <span className="text-xs font-medium text-neutral-700">{label}</span>
         </div>
         <span className="text-[10px] uppercase tracking-tighter text-neutral-400 font-bold">{category}</span>
     </button>

@@ -21,7 +21,7 @@ const VoteSideview = ({karma, handleVote, userVote}: any) => (
     </div>
 )
 
-const CommentNode = ({ comment, allComments, onReply, user, postId, allVotes = {} }: any) => {
+const CommentNode = ({ comment, allComments, onReply, user, postId, allVotes = {}, checkAuthOrRedirect }: any) => {
     const [isReplying, setIsReplying] = useState(false);
     const [replyText, setReplyText] = useState("");
     
@@ -29,7 +29,7 @@ const CommentNode = ({ comment, allComments, onReply, user, postId, allVotes = {
     const currentUserVote = allVotes[comment.id] || 0;
 
     const handleCommentVote = async (targetValue: number) => {
-        if (!user) return;
+        if ((checkAuthOrRedirect && !checkAuthOrRedirect(user)) || !user) return;
         const voteRef = doc(db, "posts", postId, "userCommentVotes", user.uid, "votes", comment.id);
         const commentRef = doc(db, "posts", postId, "comments", comment.id);
         const authorRef = doc(db, "users", comment.authorId);
@@ -162,17 +162,25 @@ export default function PostDetailPage() {
         };
     }, [user, postId]);
 
-    const submitComment = async (text: string, parentId: string | null = null, depth: number = 0) => {
-        if (!user || !text.trim()) return;
+    const checkAuthOrRedirect = (user: any) => {
+        if (!user) {
+            const currentPath = window.location.pathname;
+            startTransition(`/auth?redirect=${encodeURIComponent(currentPath)}`);
+            return false;
+        }
+        return true;
+    };
 
+    const submitComment = async (text: string, parentId: string | null = null, depth: number = 0) => {
+        if (!checkAuthOrRedirect(user)) return;
         try {
             await addDoc(collection(db, "posts", postId as string, "comments"), {
                 text,
                 parentId,
                 depth,
-                authorId: user.uid,
-                authorName: user.displayName,
-                authorPhoto: user.photoURL,
+                authorId: user!.uid,
+                authorName: user!.displayName,
+                authorPhoto: user!.photoURL,
                 createdAt: serverTimestamp(),
                 karma: 0,
             });
@@ -187,9 +195,9 @@ export default function PostDetailPage() {
     };
 
     const handlePostVote = async (targetValue: number) => {
-        if (!user) return;
+        if (!checkAuthOrRedirect(user)) return;
 
-        const voteRef = doc(db, "posts", postId as string, "votes", user.uid);
+        const voteRef = doc(db, "posts", postId as string, "votes", user!.uid);
         const postRef = doc(db, "posts", postId as string);
         const authorRef = doc(db, "users", post.authorId);
         
@@ -271,6 +279,7 @@ export default function PostDetailPage() {
                                 user={user}
                                 postId={postId}
                                 allVotes={commentVotes}
+                                checkAuthOrRedirect={checkAuthOrRedirect}
                             />
                         ))}
                     </div>
@@ -297,8 +306,24 @@ export default function PostDetailPage() {
                              </div>
                         </div>
                     ) : (
-                        <div className="p-8 bg-neutral-100 rounded-4xl text-center">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Authentication required to engage</p>
+                        <div className="mt-20 p-12 bg-[#263127] rounded-[40px] text-center space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="flex justify-center">
+                                <div className="size-12 bg-white/10 rounded-2xl flex items-center justify-center text-mint-light">
+                                    <Globe size={20} />
+                                </div>
+                            </div>
+                            <div className="max-w-xs mx-auto">
+                                <h4 className="text-xl font-bold text-white uppercase tracking-tighter">Contribution Locked</h4>
+                                <p className="text-white/50 text-[10px] font-medium uppercase tracking-widest leading-relaxed mt-2">
+                                    Join 12,000+ scholars to share your insights and build your reputation.
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => startTransition("/auth")}
+                                className="magnetic cursor-pointer px-8 py-4 bg-mint-light text-[#263127] rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-white transition-colors"
+                            >
+                                Login and Connect
+                            </button>
                         </div>
                     )}
                 </section>

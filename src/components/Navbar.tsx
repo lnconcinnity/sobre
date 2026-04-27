@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap, { useGSAP } from "../modules/gsap";
 import { usePathname } from "next/navigation";
 import { useNavStore } from "../store/useNavStore";
@@ -23,6 +24,21 @@ export default function Navbar() {
     const isHeroVisible = useNavStore((state) => state.isHeroVisible);
     const shouldShow = VALID_ROUTES.includes(pathname) && (!HIDDEN_NAV_AT_ROUTES.has(pathname) || !isHeroVisible);
     const { startTransition }= useTransition();
+    const [trendingSearches, setTrendingSearches] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchTrends = async () => {
+            try {
+                const res = await fetch("/api/analytics/trends");
+                const data = await res.json();
+                if (Array.isArray(data)) setTrendingSearches(data);
+            } catch (err) {
+                console.error("Trend fetch failed:", err);
+            }
+        };
+        fetchTrends();
+    }, []);
+    
     useGSAP(() => {
         gsap.to(navRef.current, { 
             y: shouldShow ? 0 : -100, 
@@ -73,7 +89,7 @@ export default function Navbar() {
                 ))}
             </div>
 
-            <SearchDropdown label="Search..." name="nav-search" variant="lean" onSearch={(q) => execSearch(q)} />
+            <SearchDropdown label="Search..." name="nav-search" variant="lean" suggestions={trendingSearches} onSearch={(q) => execSearch(q)} />
         </nav>
     );
 }
