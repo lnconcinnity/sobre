@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { auth } from "@/src/modules/firebase";
 import { useAuth } from "@/src/hooks/useAuth";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
@@ -19,10 +19,21 @@ export default function AuthPage() {
 
     const handleGoogleLogin = async () => {
         const provider = new GoogleAuthProvider();
+        
         try {
-            await signInWithRedirect(auth, provider);
-        } catch (error) {
-            console.error("Authentication Error:", error);
+            await signInWithPopup(auth, provider);
+            
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+                try {
+                    await signInWithRedirect(auth, provider);
+                } catch (redirectError) {
+                    console.error("Total Auth Failure:", redirectError);
+                }
+            } else {
+                console.error("Authentication Error:", error.code);
+            }
         }
     };
 
