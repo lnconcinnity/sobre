@@ -1,5 +1,5 @@
-import { groq } from "../../../actions/getGroq";
-import { firestore, db } from "../../../actions/getAdmin";
+import { groq } from "../../../../actions/getGroq";
+import { firestore, db } from "../../../../actions/getAdmin";
 
 function isGibberish(text: string): boolean {
     const t = text.toLowerCase().trim();
@@ -42,7 +42,8 @@ export async function POST(req: Request) {
                     
                     FORMAT: { "normalized": string, "isRejected": boolean }`
                 }, { role: "user", content: raw }],
-                model: "llama-3.1-8b-instant",
+                model: "openai/gpt-oss-safeguard-20b",
+                temperature: 0,
                 response_format: { type: "json_object" }
             });
 
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
                 return Response.json({ status: "rejected", isBinaryRejected: true });
             }
             
-            normalized = aiResponse.normalized.toLowerCase();
+            normalized = aiResponse.normalized.replace(/['"]+/g, '');
             await analyticsRef.doc("search_mappings").set({ [raw]: normalized }, { merge: true });
         }
     }

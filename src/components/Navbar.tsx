@@ -53,7 +53,7 @@ export default function Navbar() {
             ref={navRef}
             className="fixed top-6 left-1/2 -translate-x-1/2 z-100 flex items-center gap-4 px-6 py-3 rounded-full border border-black/5 bg-white/70 backdrop-blur-md shadow-sm opacity-0 -translate-y-40 pointer-events-none"
         >
-            <button onClick={() => handleLink("/")} className="cursor-pointer magnetic shrink-0 size-8 overflow-hidden rounded-sm relative">
+            <button onClick={() => handleLink("/")} className="rounded-full cursor-pointer magnetic shrink-0 size-8 overflow-hidden relative">
                 <Image 
                     src="/favicon.ico" 
                     alt="Sobre Logo" 

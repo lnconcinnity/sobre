@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Image from "next/image";
+import { ExternalLink, GraduationCap, Globe } from "lucide-react";
 
 export const UniversityCard = ({ item, narrative }: { item: any, narrative: any }) => {
     return (
-        <div className="locked magnetic glass-panel group relative h-[75vh] overflow-hidden rounded-4xl bg-neutral-900 border border-white/10 shadow-sm transition-all duration-500 hover:shadow-2xl">
+        <div className="magnetic glass-panel group relative h-[75vh] overflow-hidden rounded-4xl bg-neutral-900 border border-white/10 shadow-sm transition-shadow duration-500 hover:shadow-2xl">
             <div className="absolute inset-0 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out">
                 <div className="absolute inset-0 bg-neutral-800" />
                 {item.heroImage && (
@@ -28,7 +29,20 @@ export const UniversityCard = ({ item, narrative }: { item: any, narrative: any 
 
             <div className="absolute inset-x-0 bottom-0 p-8 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out bg-neutral-950/95 backdrop-blur-2xl border-t border-white/10 h-48 flex flex-col justify-between">
                 <div>
-                    <p className="text-[10px] font-bold text-mint-light uppercase mb-2 tracking-widest">Match Analysis</p>
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-bold text-mint-light uppercase tracking-widest">Match Analysis</p>
+                        <div className="flex gap-3">
+                            <a href={item.links?.website} target="_blank" title="Website" className="text-neutral-500 hover:text-white transition-colors">
+                                <Globe size={14} />
+                            </a>
+                            <a href={item.links?.scholarship} target="_blank" title="Scholarships" className="text-neutral-500 hover:text-mint-light transition-colors">
+                                <GraduationCap size={14} />
+                            </a>
+                            <a href={item.links?.portal} target="_blank" title="Apply Now" className="text-neutral-500 hover:text-white transition-colors">
+                                <ExternalLink size={14} />
+                            </a>
+                        </div>
+                    </div>
                     <p className="text-xs text-neutral-300 leading-relaxed font-medium line-clamp-3">{narrative?.why}</p>
                 </div>
                 <div className="flex flex-col pt-4 border-t border-white/5">

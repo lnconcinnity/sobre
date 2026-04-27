@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ExternalLink, GraduationCap, Globe } from "lucide-react";
+
 export const ProgramAccordion = ({ item, narratives }: { item: any, narratives: any }) => {
     const programNarrative = narratives?.[item.slug];
     
@@ -11,8 +13,8 @@ export const ProgramAccordion = ({ item, narratives }: { item: any, narratives: 
                 </div>
                 <div className="hidden md:block max-w-xs text-right">
                     <p className="text-[10px] text-neutral-400 font-bold uppercase mb-2">Program Outlook</p>
-                    <p className="text-xs text-neutral-300 italic">
-                        &quot;{programNarrative?.footnotes || 'Analyzing the academic rigor of this degree...'}&quot;
+                    <p className="text-xs text-neutral-300">
+                        {programNarrative?.footnotes || 'Analyzing the academic rigor of this degree...'}
                     </p>
                 </div>
             </div>
@@ -24,7 +26,7 @@ export const ProgramAccordion = ({ item, narratives }: { item: any, narratives: 
                         <details key={school.universitySlug} className="group outline-none">
                             <summary className="magnetic locked flex items-center justify-between p-8 cursor-pointer hover:bg-neutral-50 transition-colors list-none">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-12 h-12 bg-neutral-900 rounded-xl flex items-center justify-center font-black text-white text-xs uppercase">
+                                    <div className="w-12 h-12 bg-neutral-900 rounded-xl flex items-center justify-center font-black text-white text-xs uppercase text-center">
                                         {school.acronym}
                                     </div>
                                     <div>
@@ -63,10 +65,30 @@ export const ProgramAccordion = ({ item, narratives }: { item: any, narratives: 
                                     </div>
                                 </div>
                                 <div className="flex flex-col justify-center">
-                                    <p className="text-[10px] font-black text-neutral-400 uppercase mb-2 tracking-widest">Expert Take</p>
-                                    <p className="text-xs text-neutral-600 font-medium italic">
+                                    <p className="text-[10px] font-black text-neutral-400 uppercase mb-2 tracking-widest">Analysis</p>
+                                    <p className="text-xs text-neutral-600 font-medium">
                                         {universitySpecificWhy || `Strategically recognized for ${item.name} Excellence.`}
                                     </p>
+                                </div>
+                                <div className="flex flex-col">
+                                    <p className="text-[10px] font-black text-neutral-400 uppercase mb-3 tracking-widest">Resource Hub</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-3">
+                                        <a href={school.links?.portal} target="_blank" className="flex items-center justify-between group/link p-3 bg-white border border-neutral-100 rounded-xl hover:border-mint-dark transition-all">
+                                            <div className="flex items-center gap-2">
+                                                <ExternalLink size={12} className="text-neutral-400 group-hover/link:text-mint-dark" />
+                                                <span className="text-[10px] font-bold text-neutral-600 uppercase">Admissions</span>
+                                            </div>
+                                            <span className="text-[8px] font-black text-neutral-300">OPEN</span>
+                                        </a>
+                                        <a href={school.links?.scholarship} target="_blank" className="flex items-center gap-2 p-3 bg-white border border-neutral-100 rounded-xl hover:border-mint-dark transition-all">
+                                            <GraduationCap size={12} className="text-neutral-400 group-hover/link:text-mint-dark" />
+                                            <span className="text-[10px] font-bold text-neutral-600 uppercase">Scholarships</span>
+                                        </a>
+                                        <a href={school.links?.website} target="_blank" className="flex items-center gap-2 p-3 bg-white border border-neutral-100 rounded-xl hover:border-mint-dark transition-all">
+                                            <Globe size={12} className="text-neutral-400 group-hover/link:text-mint-dark" />
+                                            <span className="text-[10px] font-bold text-neutral-600 uppercase">College Site</span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </details>

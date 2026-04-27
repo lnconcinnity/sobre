@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getVector } from "../../actions/getVector";
-import { db } from "../../actions/getAdmin";
-import { groq } from "../../actions/getGroq";
+import { getVector } from "../../../actions/getVector";
+import { db } from "../../../actions/getAdmin";
+import { groq } from "../../../actions/getGroq";
 
 const getSlugFromUserQuery = (text: string) => {
     return text
@@ -26,39 +26,42 @@ export async function GET(req: Request) {
                     role: "system", 
                     content: `Analyze the query for university search.
 
-                    INTENT RULES:
-                    - isProgram = true: ONLY for queries asking "Suggest me degrees...", "What programs are good for...", "What degrees are okay for...", "What is...", "Define...", "Subjects in...", or "Curriculum for...".
-                    - isProgram = false: For "Best schools for...", "Where to study...", "Colleges offering...", even if a specific major is mentioned.
-                    - ALWAYS predict the base program slug (e.g., Computer Science) even if a major (e.g., Software Tech) is specified.
-
-                    EXAMPLES:
-                    1. "What is BS in Computer Science?" -> { "isProgram": true, "slugCandidates": ["bs-in-computer-science"] }
-                    2. "Best schools for computer science specifically major in software technology" -> { "isProgram": false, "slugCandidates": ["bs-in-computer-science"] }
+                    IDENTIFICATION LOGIC:
+                    - isProgram = true: The user is seeking INFORMATION ABOUT A FIELD OF STUDY.
+                    Keywords: "majors", "degrees", "programs", "curriculum", "what is", "subjects", "pre-med", "pre-law".
+                    Phrase Logic: "Best majors for [Career]" or "Degrees for [Career]" implies a program search.
+                    
+                    - isProgram = false: The user is seeking a PLACE TO ENROLL.
+                    Keywords: "schools", "colleges", "universities", "institutions", "where to study", "campuses", "institutions".
+                    Phrase Logic: "Best schools for [Major]" implies a university search.
                     
                     SLUG RULES:
                     - Standardize all Bachelor degrees to: "bs-in-[subject]" or "ba-in-[subject]".
                     - Include common variations to ensure array-contains-any hits.
                     - Example: "Accountancy" -> { "isProgram": false, "slugCandidates": ["bs-in-accountancy", "bs-in-accounting"] }
 
+                    EXAMPLES:
+                    1. "Best majors for law school" -> { "isProgram": true, "slugCandidates": ["ba-in-political-science", "ba-in-philosophy", "ba-in-legal-management"] }
+                    2. "What are the subjects in BSCS?" -> { "isProgram": true, "slugCandidates": ["bs-in-computer-science"] }
+                    3. "Top universities for nursing" -> { "isProgram": false, "slugCandidates": ["bs-in-nursing"] }
+                    4. "Where can I study accountancy?" -> { "isProgram": false, "slugCandidates": ["bs-in-accountancy", "bs-in-accounting"] }
+                    
                     Return JSON: { "isProgram": boolean, "slugCandidates": string[] }`
                 },
                 { role: "user", content: userQuery }
             ],
-            model: "llama-3.1-8b-instant",
+            temperature: 0,
+            model: "qwen/qwen3-32b",
             response_format: { type: "json_object" },
         });
 
         const parsed = JSON.parse(intentResponse.choices[0].message.content || "{}");
-        let isProgram = parsed.isProgram;
-        
+        const isProgram = parsed.isProgram;
         const slugCandidates = (parsed.slugCandidates || [])
             .map((s: string) => getSlugFromUserQuery(s))
             .slice(0, 10);
             
         const queryVector = await getVector(userQuery);
-
-        const forceUniversity = /school|university|college|where to|best/i.test(userQuery);
-        if (forceUniversity) isProgram = false;
         
         const intent = isProgram ? "programs" : "universities";
         const collectionRef = db.collection(intent);
@@ -68,7 +71,7 @@ export async function GET(req: Request) {
         if (isProgram && slugCandidates.length > 0) {
             snapshot = await collectionRef.where("slug", "in", slugCandidates).limit(3).get();
             
-            if (snapshot.empty) {
+            if (!snapshot || snapshot.empty) {
                 snapshot = await collectionRef.findNearest({
                     vectorField: "embedding",
                     queryVector: queryVector,
@@ -77,28 +80,38 @@ export async function GET(req: Request) {
                 }).get();
             }
         } else {
-            let queryChain: any = collectionRef;
-            
+            const queryChain = collectionRef;
+            const searchOptions = {
+                vectorField: "embedding",
+                queryVector,
+                distanceMeasure: "COSINE" as any,
+                limit: 3,
+            };
+
             if (slugCandidates.length > 0) {
-                queryChain = queryChain.where("programSlugs", "array-contains-any", slugCandidates);
+                snapshot = await queryChain
+                    .where("programSlugs", "array-contains-any", slugCandidates)
+                    .findNearest(searchOptions).get();
             }
 
-            snapshot = await queryChain.findNearest({
+            if (!snapshot || snapshot.empty) {
+                snapshot = await collectionRef.findNearest(searchOptions).get();
+            }
+        }
+
+        const forumSnapshot = await db.collection("posts")
+            .findNearest({
                 vectorField: "embedding",
                 queryVector: queryVector,
                 distanceMeasure: "COSINE",
-                limit: 3, 
+                limit: 5,
             }).get();
 
-            if (snapshot.empty) {
-                snapshot = await collectionRef.findNearest({
-                    vectorField: "embedding",
-                    queryVector: queryVector,
-                    distanceMeasure: "COSINE",
-                    limit: 3,
-                }).get();
-            }
-        }
+        const threads = forumSnapshot.docs.map(doc => {
+            const data = doc.data();
+            delete data.embedding;
+            return { id: doc.id, ...data };
+        });
 
         const results = snapshot.docs.map((doc: any) => {
             const data = doc.data();
@@ -110,8 +123,7 @@ export async function GET(req: Request) {
             };
         });
 
-        return Response.json({ results, intent });
-
+        return Response.json({ results, intent, threads });
     } catch (error) {
         console.error("Hybrid Search Error:", error);
         return Response.json({ error: "Internal Server Error" }, { status: 500 });

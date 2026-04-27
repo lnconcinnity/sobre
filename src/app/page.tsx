@@ -18,11 +18,8 @@ export default function HomePage() {
     const setHeroVisible = useNavStore((state) => state.setHeroVisible);
     const [welcomeContainer, inView] = useInView({ threshold: 0.4, });
     const { startTransition } = useTransition();
-    const [trendingSearches, setTrendingSearches] = useState([
-        { id: "seed1", label: "UPCAT Prep 2026", query: "upcat" },
-        { id: "seed2", label: "Best Engineering Schools", query: "engineering" },
-        { id: "seed3", label: "Scholarships", query: "scholarships" },
-    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [trendingSearches, setTrendingSearches] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchTrends = async () => {

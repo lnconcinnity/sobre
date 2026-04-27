@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { db, firestore } from "../../app/actions/getAdmin";
-import { getVector } from "../../app/actions/getVector";
-import { seed_data } from "./data";
+import { db, firestore } from "../../actions/getAdmin";
+import { getVector } from "../../actions/getVector";
+import { seed_data as scholarshipData } from "./scholarshipData"
+import { seed_data as universitySeedData } from "./universityData";
 
 const clearCollections = async (collectionIds: string[]) => {
     for (const id of collectionIds) {
@@ -44,9 +45,21 @@ const getProgramSlug = (text: string) => {
 export const pushUniversities = async () => {
     if (process.env.NODE_ENV === "production") return;
 
-    await clearCollections(["universities", "programs"]);
+    await clearCollections(["universities", "programs", "scholarships"]);
 
-    for (const item of seed_data) {
+    console.log("Seeding Scholarships...");
+    for (const item of scholarshipData) {
+        const vectorInput = `${item.name} by ${item.provider}. Support for: ${item.tags.join(", ")}. ${item.description}`;
+        const vectorValues = await getVector(vectorInput);
+
+        await db.collection("scholarships").doc(item.id).set({
+            ...item,
+            embedding: firestore.FieldValue.vector(vectorValues)
+        });
+    }
+
+    console.log("Seeding Universities...");
+    for (const item of universitySeedData) {
         const { university, programs } = item;
         const schoolKey = university.slug;
         const allProgramSlugs = new Set<string>();
@@ -83,6 +96,7 @@ export const pushUniversities = async () => {
         });
 
         // 2. Process Programs
+        console.log(`Seeding Programs of ${university.name}...`);
         for (const prog of programs) {
             const { progSlug, baseTitle, majorSlug } = getProgramSlug(prog.title); 
             const progRef = db.collection("programs").doc(progSlug);

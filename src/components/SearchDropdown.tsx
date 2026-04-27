@@ -13,7 +13,7 @@ interface SearchDropdownProps {
 }
 
 const DropdownItem = ({ icon, label, category, onClick }: { icon: string, label: string, category: string, onClick: () => void }) => (
-    <button onClick={onClick} className="locked magnetic relative group flex items-center justify-between p-3 hover:bg-mint-light/10 transition-all cursor-pointer rounded-lg">
+    <button onClick={onClick} className="locked magnetic relative group flex items-center justify-between p-3 hover:bg-mint-light/10 transition-colors cursor-pointer rounded-lg">
         <div className="flex items-center gap-3">
             <span className="text-lg opacity-50 group-hover:opacity-100 transition-opacity">{icon}</span>
             <span className="text-sm font-medium text-neutral-700">{label}</span>
@@ -62,7 +62,7 @@ export default function SearchDropdown({
                     onKeyDown={(e) => e.key === "Enter" && triggerSearch(inputValue)}
                 />
             ) : (
-                <div className="magnetic sticky-cursor group relative border-b border-black/10 focus-within:border-mint-dark transition-all">
+                <div className="magnetic sticky-cursor group relative border-b border-black/10 focus-within:border-mint-dark transition-colors">
                     <input 
                         type="text" 
                         name={name}
@@ -70,7 +70,7 @@ export default function SearchDropdown({
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && triggerSearch(inputValue)}
                         placeholder="Search..." 
-                        className="bg-transparent outline-none text-xs py-1 w-full focus:placeholder-transparent transition-all duration-500"
+                        className="bg-transparent outline-none text-xs py-1 w-full focus:placeholder-transparent transition-colors duration-500"
                     />
                 </div>
             )}

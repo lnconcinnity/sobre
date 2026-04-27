@@ -1,4 +1,4 @@
-import { UniversitySchema, CollegeInfo } from "../../types/dataSchema";
+import { UniversitySchema, CollegeInfo } from "../../types/schoolSchema";
 
 interface SeedItem {
     university: UniversitySchema;
@@ -26,17 +26,17 @@ export const seed_data: SeedItem[] = [
                 scholarship: "https://slasonline.up.edu.ph",
                 website: "https://upd.edu.ph"
             },
-            tags: ["Semestral", "State University", "Free Tuition", "National University", "QS World Ranking: #404", "THE World Ranking: 801-1000", "CHED Autonomous Status", "ASEAN University Network Member", "Center of Excellence", "Top 1 Engineering School Philippines", "Premier Research Hub", "Public Sector Leader"]
+            tags: ["Trimestral", "State University", "Free Tuition", "National University", "QS World Ranking: #404", "THE World Ranking: 801-1000", "CHED Autonomous Status", "ASEAN University Network Member", "Center of Excellence", "Top 1 Engineering School Philippines", "Premier Research Hub", "Public Sector Leader"]
         },
         programs: [
-            { title: "BS in Computer Science", code: "BSCS", tags: ["Algorithms", "Artificial Intelligence", "Theory", "Data Structures", "CHED Center of Excellence", "COE", "Engineering Accreditation", "Research Track"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "Washington Accord Equivalent"] } },
-            { title: "BS in Geodetic Engineering", code: "BSGE", tags: ["Geomatics", "Remote Sensing", "GIS", "Land Management", "CHED Center of Excellence", "Board Exam Top Performing", "Satellite Imagery"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } },
-            { title: "BS in Industrial Engineering", code: "BSIE", tags: ["Operations Research", "Systems Optimization", "Supply Chain", "Ergonomics", "CHED Center of Excellence", "Management Science"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } },
-            { title: "BS in Chemical Engineering", code: "BSChE", tags: ["Process Design", "Biotechnology", "Material Science", "Thermodynamics", "CHED Center of Excellence", "Industrial Chemistry"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } },
-            { title: "BS in Molecular Biology and Biotechnology", code: "BSMBB", tags: ["Genetic Engineering", "Microbiology", "Bioinformatics", "Molecular Research", "CHED Center of Excellence", "Premier Science Program"], collegeData: { college_name: "College of Science", acronym: "CS", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } },
-            { title: "BS in Applied Physics", code: "BSAP", tags: ["Instrumentation", "Photonics", "Materials Physics", "Computational Physics", "CHED Center of Excellence", "Advanced Research"], collegeData: { college_name: "College of Science", acronym: "CS", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } },
-            { title: "BS in Mathematics", code: "BS-MATH", tags: ["Pure Mathematics", "Actuarial Science", "Statistics", "Number Theory", "CHED Center of Excellence", "Quantitative Analytics"], collegeData: { college_name: "College of Science", acronym: "CS", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } },
-            { title: "Bachelor of Secondary Education", code: "BSEd", tags: ["Language Education", "Science Teaching", "Pedagogy", "Curriculum Design", "CHED Center of Excellence", "Premier Teacher Training"], collegeData: { college_name: "College of Education", acronym: "EDUC", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence"] } }
+            { title: "BS in Computer Science", code: "BSCS", tags: ["Algorithms", "Artificial Intelligence", "Theory", "Data Structures", "CHED Center of Excellence", "COE", "Engineering Accreditation", "Research Track"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "Washington Accord Equivalent"] } },
+            { title: "BS in Geodetic Engineering", code: "BSGE", tags: ["Geomatics", "Remote Sensing", "GIS", "Land Management", "CHED Center of Excellence", "Board Exam Top Performing", "Satellite Imagery"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } },
+            { title: "BS in Industrial Engineering", code: "BSIE", tags: ["Operations Research", "Systems Optimization", "Supply Chain", "Ergonomics", "CHED Center of Excellence", "Management Science"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } },
+            { title: "BS in Chemical Engineering", code: "BSChE", tags: ["Process Design", "Biotechnology", "Material Science", "Thermodynamics", "CHED Center of Excellence", "Industrial Chemistry"], collegeData: { college_name: "College of Engineering", acronym: "COE", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } },
+            { title: "BS in Molecular Biology and Biotechnology", code: "BSMBB", tags: ["Genetic Engineering", "Microbiology", "Bioinformatics", "Molecular Research", "CHED Center of Excellence", "Premier Science Program"], collegeData: { college_name: "College of Science", acronym: "CS", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } },
+            { title: "BS in Applied Physics", code: "BSAP", tags: ["Instrumentation", "Photonics", "Materials Physics", "Computational Physics", "CHED Center of Excellence", "Advanced Research"], collegeData: { college_name: "College of Science", acronym: "CS", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } },
+            { title: "BS in Mathematics", code: "BS-MATH", tags: ["Pure Mathematics", "Actuarial Science", "Statistics", "Number Theory", "CHED Center of Excellence", "Quantitative Analytics"], collegeData: { college_name: "College of Science", acronym: "CS", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } },
+            { title: "Bachelor of Secondary Education", code: "BSEd", tags: ["Language Education", "Science Teaching", "Pedagogy", "Curriculum Design", "CHED Center of Excellence", "Premier Teacher Training"], collegeData: { college_name: "College of Education", acronym: "EDUC", tuition_range: { min: 0, max: 0, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence"] } }
         ]
     },
     {
@@ -57,12 +57,12 @@ export const seed_data: SeedItem[] = [
             tags: ["Trimestral", "PAASCU Level IV", "Research-Heavy", "Private Catholic", "Center of Excellence", "QS World Ranking: #681-690", "THE World Ranking: 1201-1500", "ASEAN University Network Member", "Cintana Alliance Partner", "Business Excellence", "Top IT University", "Innovation Leader"]
         },
         programs: [
-            { title: "BS in Computer Science major in Software Technology", code: "BSCS-ST", tags: ["Software Engineering", "Full-stack Development", "Algorithms", "Systems Architecture", "CHED Center of Excellence", "ABET Accredited", "High Salary Track"], collegeData: { college_name: "Gokongwei College of Computer Studies", acronym: "CCS", tuition_range: { min: 75000, max: 95000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "ABET Accredited", "PAASCU Level IV"] } },
-            { title: "BS in Information Technology", code: "BS-IT", tags: ["Web Systems", "Mobile Development", "UX Design", "Cloud Computing", "CHED Center of Excellence", "Industry Partnership", "Digital Transformation"], collegeData: { college_name: "Gokongwei College of Computer Studies", acronym: "CCS", tuition_range: { min: 75000, max: 95000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "PAASCU Level IV"] } },
-            { title: "BS in Accountancy", code: "BSA", tags: ["Financial Audit", "Taxation", "CPA Track", "Management Accounting", "CHED Center of Excellence", "Top Performing School", "Global Finance"], collegeData: { college_name: "Andrew L. Tan College of Business", acronym: "RVR-COB", tuition_range: { min: 75000, max: 90000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "AACSB Member", "PAASCU Level IV"] } },
-            { title: "BS in Applied Corporate Management", code: "BS-ACM", tags: ["Corporate Strategy", "Operations", "Leadership", "Business Ethics", "CHED Center of Excellence", "Management Training", "Industry Internship"], collegeData: { college_name: "Andrew L. Tan College of Business", acronym: "RVR-COB", tuition_range: { min: 75000, max: 90000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "PAASCU Level IV"] } },
-            { title: "BS in Civil Engineering", code: "BS-CE", tags: ["Structural Engineering", "Urban Planning", "Hydraulics", "Geotechnics", "CHED Center of Excellence", "ABET Engineering Accreditation"], collegeData: { college_name: "Gokongwei College of Engineering", acronym: "GCOE", tuition_range: { min: 78000, max: 95000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "ABET Accredited", "PAASCU Level IV"] } },
-            { title: "BS in Manufacturing Engineering and Management", code: "BS-MEM", tags: ["Industrial Automation", "Supply Chain", "Mechatronics", "Lean Manufacturing", "CHED Center of Excellence", "Robotics Integration"], collegeData: { college_name: "Gokongwei College of Engineering", acronym: "GCOE", tuition_range: { min: 78000, max: 95000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["CHED Center of Excellence", "PAASCU Level IV"] } }
+            { title: "BS in Computer Science major in Software Technology", code: "BSCS-ST", tags: ["Software Engineering", "Full-stack Development", "Algorithms", "Systems Architecture", "CHED Center of Excellence", "ABET Accredited", "High Salary Track"], collegeData: { college_name: "Gokongwei College of Computer Studies", acronym: "CCS", tuition_range: { min: 75000, max: 95000, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "ABET Accredited", "PAASCU Level IV"] } },
+            { title: "BS in Information Technology", code: "BS-IT", tags: ["Web Systems", "Mobile Development", "UX Design", "Cloud Computing", "CHED Center of Excellence", "Industry Partnership", "Digital Transformation"], collegeData: { college_name: "Gokongwei College of Computer Studies", acronym: "CCS", tuition_range: { min: 75000, max: 95000, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "PAASCU Level IV"] } },
+            { title: "BS in Accountancy", code: "BSA", tags: ["Financial Audit", "Taxation", "CPA Track", "Management Accounting", "CHED Center of Excellence", "Top Performing School", "Global Finance"], collegeData: { college_name: "Andrew L. Tan College of Business", acronym: "RVR-COB", tuition_range: { min: 75000, max: 90000, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "AACSB Member", "PAASCU Level IV"] } },
+            { title: "BS in Applied Corporate Management", code: "BS-ACM", tags: ["Corporate Strategy", "Operations", "Leadership", "Business Ethics", "CHED Center of Excellence", "Management Training", "Industry Internship"], collegeData: { college_name: "Andrew L. Tan College of Business", acronym: "RVR-COB", tuition_range: { min: 75000, max: 90000, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "PAASCU Level IV"] } },
+            { title: "BS in Civil Engineering", code: "BS-CE", tags: ["Structural Engineering", "Urban Planning", "Hydraulics", "Geotechnics", "CHED Center of Excellence", "ABET Engineering Accreditation"], collegeData: { college_name: "Gokongwei College of Engineering", acronym: "GCOE", tuition_range: { min: 78000, max: 95000, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "ABET Accredited", "PAASCU Level IV"] } },
+            { title: "BS in Manufacturing Engineering and Management", code: "BS-MEM", tags: ["Industrial Automation", "Supply Chain", "Mechatronics", "Lean Manufacturing", "CHED Center of Excellence", "Robotics Integration"], collegeData: { college_name: "Gokongwei College of Engineering", acronym: "GCOE", tuition_range: { min: 78000, max: 95000, currency: "PHP", billing_cycle: "Trimester" }, accreditation: ["CHED Center of Excellence", "PAASCU Level IV"] } }
         ]
     },
     {
@@ -266,6 +266,81 @@ export const seed_data: SeedItem[] = [
             { title: "BS in Information Technology", code: "BSIT", tags: ["Web Systems", "Networking", "Database", "Tech for Education", "Digital Literacy"], collegeData: { college_name: "School of Arts, Sciences, and Technology", acronym: "SAST", tuition_range: { min: 22000, max: 32000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["PACUCOA Accredited"] } },
             { title: "BS in Psychology", code: "BSPSY", tags: ["Educational Psychology", "Human Behavior", "Counseling", "HR Management", "Social Science"], collegeData: { college_name: "School of Arts, Sciences, and Technology", acronym: "SAST", tuition_range: { min: 22000, max: 32000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["PACUCOA Accredited"] } },
             { title: "BS in Accountancy", code: "BSA", tags: ["Financial Reporting", "Audit", "Taxation", "Management Accounting", "Business Core"], collegeData: { college_name: "School of Business", acronym: "SOB", tuition_range: { min: 25000, max: 35000, currency: "PHP", billing_cycle: "Semester" }, accreditation: ["PACUCOA Accredited"] } }
+        ]
+    },
+    {
+        "university": {
+            "name": "San Beda University",
+            "slug": "san-beda",
+            "heroImage": "https://25174313.fs1.hubspotusercontent-eu1.net/hub/25174313/hubfs/assets_moneymax/san-beda-university-scaled.jpg?width=900&height=600&name=san-beda-university-scaled.jpg",
+            "location": {
+                "campus": "Mendiola Campus",
+                "city": "Manila",
+                "address": "638 Mendiola St, San Miguel, Manila"
+            },
+            "links": {
+                "portal": "https://admissions.sanbeda.edu.ph/login",
+                "scholarship": "https://www.sanbeda.edu.ph/manila/admissions/scholarship-application",
+                "website": "https://www.sanbeda.edu.ph"
+            },
+            "tags": ["Benedictine Education", "Law Excellence", "Catholic", "Mendiola Consortium", "Lions Heritage", "Traditional", "Private Education", "Elite Network", "Governance", "Red and White Traditions"]
+        },
+        "programs": [
+            { "title": "Bachelor of Laws", "code": "LLB", "tags": ["Juris Doctor", "Legal Excellence", "Top Bar Performance", "Litigation", "Governance"], "collegeData": { "college_name": "College of Law", "acronym": "COL", "tuition_range": { "min": 60000, "max": 80000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["LEB Accredited"] } },
+            { "title": "BS in Accountancy", "code": "BSA", "tags": ["CPALE Performance", "Audit", "Taxation", "Financial Management", "Corporate Leadership"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 50000, "max": 65000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PAASCU Level III"] } },
+            { "title": "BS in Business Administration", "code": "BSBA", "tags": ["Operations", "Marketing", "Human Resources", "Entrepreneurship"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 50000, "max": 65000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PAASCU Accredited"] } },
+            { "title": "AB in Legal Management", "code": "ABLM", "tags": ["Pre-Law", "Corporate Law Basics", "Legal Drafting", "Paralegal Training"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 45000, "max": 60000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PAASCU Accredited"] } },
+            { "title": "BS in Psychology", "code": "BSPSY", "tags": ["Clinical Psychology", "Behavioral Science", "Research", "HR Foundations"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 48000, "max": 62000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PAASCU Accredited"] } }
+        ]
+    },
+    {
+        "university": {
+            "name": "National University",
+            "slug": "nu",
+            "heroImage": "https://national-u.edu.ph/wp-content/uploads/2021/04/banner-nu-manila.jpg",
+            "location": {
+                "campus": "Main Campus",
+                "city": "Manila",
+                "address": "551 M.F. Jhocson St, Sampaloc, Manila"
+            },
+            "links": {
+                "portal": "https://www.national-u.edu.ph/nu-manila/admissions/",
+                "scholarship": "https://www.national-u.edu.ph/nu-manila/scholarships/",
+                "website": "https://national-u.edu.ph"
+            },
+            "tags": ["Trimestral", "SM Group Education", "Sports Excellence", "Heritage Education", "Innovation", "Sampaloc District", "UAAP Pioneer", "Career-Ready", "Dynamic Campus", "Technology-Driven"]
+        },
+        "programs": [
+            { "title": "BS in Civil Engineering", "code": "BSCE", "tags": ["Structural Design", "Hydraulics", "Board Exam Focus", "Infrastructure", "Engineering Legacy"], "collegeData": { "college_name": "College of Engineering", "acronym": "COE", "tuition_range": { "min": 35000, "max": 45000, "currency": "PHP", "billing_cycle": "Trimester" }, "accreditation": ["PACUCOA Accredited", "CHED Recognized"] } },
+            { "title": "BS in Architecture", "code": "BSARCH", "tags": ["Urban Design", "AutoCAD", "Planning", "Sustainability", "Visual Arts"], "collegeData": { "college_name": "College of Architecture", "acronym": "COA", "tuition_range": { "min": 38000, "max": 48000, "currency": "PHP", "billing_cycle": "Trimester" }, "accreditation": ["PACUCOA Accredited"] } },
+            { "title": "BS in Information Technology", "code": "BSIT", "tags": ["Game Development", "Cybersecurity", "Mobile Dev", "SM Tech Ecosystem"], "collegeData": { "college_name": "College of Computing and Information Technologies", "acronym": "CCIT", "tuition_range": { "min": 35000, "max": 45000, "currency": "PHP", "billing_cycle": "Trimester" }, "accreditation": ["CHED Center of Development"] } },
+            { "title": "BS in Nursing", "code": "BSN", "tags": ["Community Health", "Clinical Practice", "Nursing Board", "Healthcare Services"], "collegeData": { "college_name": "College of Allied Health", "acronym": "COAH", "tuition_range": { "min": 38000, "max": 48000, "currency": "PHP", "billing_cycle": "Trimester" }, "accreditation": ["PACUCOA Accredited"] } },
+            { "title": "BS in Accountancy", "code": "BSA", "tags": ["Financial Analytics", "Management Accounting", "Tax", "Business Operations"], "collegeData": { "college_name": "College of Business and Accountancy", "acronym": "CBA", "tuition_range": { "min": 35000, "max": 42000, "currency": "PHP", "billing_cycle": "Trimester" }, "accreditation": ["PACUCOA Accredited"] } }
+        ]
+    },
+    {
+        "university": {
+            "name": "Arellano University",
+            "slug": "arellano",
+            "heroImage": "https://tse1.mm.bing.net/th/id/OIP.Ak9AOCocf3VUrrx7iFxSQgHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",
+            "location": {
+                "campus": "Juan Sumulong Campus",
+                "city": "Manila",
+                "address": "2600 Legarda St, Sampaloc, Manila"
+            },
+            "links": {
+                "portal": "https://www.arellano.edu.ph/admission/student-admission-requirements/",
+                "scholarship": "https://www.arellano.edu.ph/admission/scholarship-programs/",
+                "website": "https://arellano.edu.ph"
+            },
+            "tags": ["Semestral", "Mass-Based Education", "Accessible", "Nursing Heritage", "Pasig-Manila Network", "Inclusive", "Private Education", "Practical Learning", "Chiefs Nation", "Diverse Campuses"]
+        },
+        "programs": [
+            { "title": "BS in Nursing", "code": "BSN", "tags": ["Intensive Training", "NLE Prep", "Healthcare Legacy", "Global Nursing Opportunities"], "collegeData": { "college_name": "College of Nursing", "acronym": "CON", "tuition_range": { "min": 30000, "max": 45000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PACUCOA Level IV"] } },
+            { "title": "BS in Criminology", "code": "BSCRIM", "tags": ["Forensics", "Law Enforcement", "Criminal Justice", "Public Safety"], "collegeData": { "college_name": "College of Criminal Justice Education", "acronym": "CCJE", "tuition_range": { "min": 25000, "max": 35000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PACUCOA Accredited"] } },
+            { "title": "Bachelor of Secondary Education", "code": "BSEd", "tags": ["English", "MAPEH", "Instructional Strategy", "Teaching Certification"], "collegeData": { "college_name": "College of Education", "acronym": "CED", "tuition_range": { "min": 22000, "max": 30000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PACUCOA Accredited"] } },
+            { "title": "BS in Psychology", "code": "BSPSY", "tags": ["HR Foundations", "Social Science", "Guidance", "Clinical Basics"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 22000, "max": 30000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PACUCOA Accredited"] } },
+            { "title": "BS in Hospitality Management", "code": "BSHM", "tags": ["Culinary Arts", "Tourism", "Hotel Operations", "Customer Service"], "collegeData": { "college_name": "College of Hospitality Management", "acronym": "CHM", "tuition_range": { "min": 28000, "max": 38000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PACUCOA Accredited"] } }
         ]
     }
 ];

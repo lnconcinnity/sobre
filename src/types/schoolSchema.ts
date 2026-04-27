@@ -3,7 +3,7 @@ export interface TuitionRange {
     min: number;
     max: number;
     currency: "PHP";
-    billing_cycle: "Semester" | "Quarterm"; 
+    billing_cycle: "Semester" | "Quarterm" | "Trimester"; 
 }
 
 export interface Program {

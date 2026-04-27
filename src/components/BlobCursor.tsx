@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useRef, useState } from "react";
 import gsap, { useGSAP } from "../modules/gsap";
@@ -33,6 +32,7 @@ export default function BlobCursor() {
         gsap.set(cursor, {
             width: 24,
             height: 24,
+            borderRadius: "100%",
             xPercent: 0,
             yPercent: 0
         });
@@ -112,6 +112,16 @@ export default function BlobCursor() {
                     }
                 }
 
+                const elStyles = window.getComputedStyle(el);
+                const rawRadius = elStyles.borderRadius;
+                const targetRadius = rawRadius.split(' ').map(value => {
+                    if (value.includes('%')) return value;
+                    
+                    const pxValue = parseFloat(value);
+                    if (isNaN(pxValue)) return value;
+                    return `${pxValue + 5}px`;
+                }).join(' ');
+                
                 s.isLatched = true;
                 s.latchedEl = el;
                 s.latchedIsLocked = isLocked;
@@ -119,16 +129,18 @@ export default function BlobCursor() {
                 const dx = e.clientX - centerX;
                 const dy = e.clientY - centerY;
 
+                gsap.to(cursor, {
+                    width: currentRect.width + 10,
+                    height: currentRect.height + 10,
+                    borderRadius: targetRadius,
+                    duration: 0.5,
+                    overwrite: "auto",
+                    ease: "power3.out"
+                });
+                
                 if (isLocked) {
                     s.mouse.x = centerX + (dx * 0.1);
                     s.mouse.y = centerY + (dy * 0.1);
-                    gsap.to(cursor, {
-                        width: currentRect.width + 10,
-                        height: currentRect.height + 10,
-                        duration: 0.5,
-                        overwrite: "auto",
-                        ease: "power3.out"
-                    });
                 } else {
                     const area = currentRect.width * currentRect.height;
                     const strength = Math.max(0.1, Math.min(0.5, 1000 / Math.sqrt(area)));
@@ -141,13 +153,6 @@ export default function BlobCursor() {
                     const moveY = Math.max(-maxMove, Math.min(maxMove, dy * moveStrength));
                     
                     gsap.to(el, { x: moveX, y: moveY, duration: 0.5, ease: "power2.out" });
-                    gsap.to(cursor, {
-                        width: currentRect.width + 10,
-                        height: currentRect.height + 10,
-                        duration: 0.5,
-                        overwrite: "auto",
-                        ease: "power3.out"
-                    });
                 }
             };
 
@@ -164,6 +169,7 @@ export default function BlobCursor() {
                 gsap.to(cursor, {
                     width: 24,
                     height: 24,
+                    borderRadius: "100%",
                     duration: exitDuration,
                     ease: exitEase
                 });
@@ -207,6 +213,6 @@ export default function BlobCursor() {
     }, [pathname]);
 
     return (
-        <div ref={cursorRef} id="custom-cursor" className={`fixed top-0 left-0 size-6 border border-mint-dark rounded-full pointer-events-none z-9999 ${hasMoved ? 'opacity-100' : 'opacity-0'}`} />
+        <div ref={cursorRef} id="custom-cursor" className={`fixed top-0 left-0 size-6 border border-mint-dark pointer-events-none z-9999 ${hasMoved ? 'opacity-100' : 'opacity-0'}`} />
     );
 }

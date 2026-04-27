@@ -1,4 +1,4 @@
-import { db } from "../../../actions/getAdmin";
+import { db } from "../../../../actions/getAdmin";
 
 export async function GET() {
     try {

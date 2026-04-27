@@ -17,6 +17,18 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '25174313.fs1.hubspotusercontent-eu1.net', // San Beda
+      },
+      {
+        protocol: 'https',
+        hostname: 'tse1.mm.bing.net', // AU
+      },
+      {
+        protocol: 'https',
+        hostname: 'national-u.edu.ph', // NU
+      },
+      {
+        protocol: 'https',
         hostname: 'manilasociety.com', // FEU
       },
       {
@@ -42,6 +54,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'smapse.com', // UP Diliman
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
       },
     ],
   },
