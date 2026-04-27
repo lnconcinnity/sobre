@@ -22,7 +22,6 @@ export default function AuthPage() {
         
         try {
             await signInWithPopup(auth, provider);
-            
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
