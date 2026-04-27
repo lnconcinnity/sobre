@@ -1,21 +1,21 @@
 "use client";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { auth } from "@/src/modules/firebase";
 import { useAuth } from "@/src/hooks/useAuth";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import { useTransition } from "@/src/hooks/useTransition";
 
 export default function AuthPage() {
     const { user, loading } = useAuth();
-    const router = useRouter();
+    const { startTransition } = useTransition();
 
     useEffect(() => {
         if (!loading && user) {
-            router.push("/forum");
+            startTransition("/forum");
         }
-    }, [user, loading, router]);
+    }, [user, loading, startTransition]);
 
     const handleGoogleLogin = async () => {
         const provider = new GoogleAuthProvider();
@@ -34,7 +34,7 @@ export default function AuthPage() {
                 </div>
                 
                 <button 
-                    onClick={() => router.back()}
+                    onClick={() => startTransition("/forum")}
                     className="magnetic max-w-40 cursor-pointer relative z-10 flex items-center gap-2 text-mint-light/50 hover:text-mint-light transition-colors text-[10px] font-black uppercase tracking-widest"
                 >
                     <ArrowLeft size={14} /> Back to browsing
