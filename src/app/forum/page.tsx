@@ -42,7 +42,7 @@ export default function ForumPage() {
                             The Collective Intelligence
                         </span>
                         <h1 className="text-6xl font-black text-black uppercase tracking-tighter">
-                            Student <span className="text-neutral-300">Forum.</span>
+                            Student <span className="text-transparent" style={{ WebkitTextStroke: "1px #263127" }}>Forum.</span>
                         </h1>
                     </div>
                     <div className="flex bg-white p-1 rounded-2xl border border-neutral-200">

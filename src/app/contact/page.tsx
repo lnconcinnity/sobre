@@ -11,7 +11,7 @@ export default function ContactPage() {
                     </span>
                     <h1 className="text-7xl md:text-8xl font-black text-black uppercase leading-none tracking-tighter">
                         Let&apos;s talk <br /> 
-                        <span className="text-mint-dark">strategy.</span>
+                        <span className="text-transparent" style={{ WebkitTextStroke: "1px #263127" }}>strategy.</span>
                     </h1>
                 </div>
 
