@@ -50,7 +50,7 @@ export default function ForumPage() {
                             <button 
                                 key={tab}
                                 onClick={() => setActiveTab(tab.toLowerCase())}
-                                className={`cursor-pointer magnetic px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                className={`cursor-pointer magnetic px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${
                                     activeTab === tab.toLowerCase() ? "bg-black text-white" : "text-neutral-400 hover:text-black"
                                 }`}
                             >
