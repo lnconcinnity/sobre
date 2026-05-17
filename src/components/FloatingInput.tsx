@@ -1,27 +1,43 @@
 "use client";
 
+import React from "react";
+
 interface FloatingInputProps {
     label: string;
     name: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onFocus?: () => void;
     children?: React.ReactNode;
 }
 
-export default function FloatingInput({ label, name, onChange, value, onKeyDown, children }: FloatingInputProps) {
+export default function FloatingInput({ 
+    label, 
+    name, 
+    onChange, 
+    value, 
+    onKeyDown, 
+    onFocus, 
+    children 
+}: FloatingInputProps) {
     return (
-        <div className="locked magnetic relative mt-6 group w-full max-w-md">
+        <div className="locked magnetic relative mt-6 group w-full max-w-md rounded-full">
             <div className="relative overflow-hidden border-b border-black/10 transition-colors duration-500 focus-within:border-mint-dark">
                 <input 
                     type="text"
-                    name={name}
+                    name={`sobre_unique_${name}_field`}
+                    autoComplete="one-time-code"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck="false"
                     id={name}
                     value={value}
                     onKeyDown={onKeyDown}
+                    onFocus={onFocus}
                     placeholder=" " 
                     onChange={onChange}
-                    className="peer block w-full px-0 pt-4 pb-1 text-base bg-transparent border-none appearance-none focus:outline-none focus:ring-0 transition-colors"
+                    className="peer block w-full px-0 pt-4 pb-1 text-base bg-transparent border-none appearance-none focus:outline-none focus:ring-0 transition-colors text-neutral-900"
                 />
                 <label 
                     htmlFor={name}

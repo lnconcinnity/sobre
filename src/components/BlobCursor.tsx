@@ -213,6 +213,6 @@ export default function BlobCursor() {
     }, [pathname]);
 
     return (
-        <div ref={cursorRef} id="custom-cursor" className={`fixed top-0 left-0 size-6 border border-mint-dark pointer-events-none z-9999 ${hasMoved ? 'opacity-100' : 'opacity-0'}`} />
+        <div ref={cursorRef} id="custom-cursor" className={`not-md:invisible fixed top-0 left-0 size-6 border border-mint-dark pointer-events-none z-9999 ${hasMoved ? 'opacity-100' : 'opacity-0'}`} />
     );
 }

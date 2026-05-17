@@ -1,8 +1,51 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db, firestore } from "../../actions/getAdmin";
 import { getVector } from "../../actions/getVector";
-import { seed_data as scholarshipData } from "./scholarshipData"
+import { seed_data as scholarshipData } from "./scholarshipData";
 import { seed_data as universitySeedData } from "./universityData";
+
+const inferUniversityAliases = (fullName: string): string[] => {
+    const aliases = new Set<string>();
+    const cleanName = fullName.trim();
+    
+    aliases.add(cleanName);
+    aliases.add(cleanName.toLowerCase());
+
+    const coreName = cleanName
+        .replace(/\bUniversity\b/gi, "")
+        .replace(/\bof\b/gi, "")
+        .replace(/\bthe\b/gi, "")
+        .replace(/\bPhilippines\b/gi, "")
+        .replace(/-.*/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (coreName && coreName.length > 2) {
+        aliases.add(coreName);
+        aliases.add(coreName.toLowerCase());
+        
+        if (coreName.toLowerCase().startsWith("de la ")) {
+            const chopped = coreName.substring(3).trim();
+            aliases.add(chopped);
+            aliases.add(chopped.toLowerCase());
+        }
+    }
+
+	const words = cleanName.split(/[\s-]+/);
+    const acronym = words
+        .map(w => w.replace(/[^a-zA-Z]/g, ""))
+        .filter(w => w && !["of", "the", "in", "at"].includes(w.toLowerCase()))
+        .map(w => w[0])
+        .join("")
+        .toUpperCase();
+
+    if (acronym && acronym.length >= 2) {
+        aliases.add(acronym);
+        aliases.add(acronym.toLowerCase());
+    }
+
+    return Array.from(aliases);
+};
 
 const clearCollections = async (collectionIds: string[]) => {
     for (const id of collectionIds) {
@@ -40,7 +83,7 @@ const getProgramSlug = (text: string) => {
     const progSlug = slugify(baseTitle);
     const majorSlug = rawMajorTitle ? slugify(rawMajorTitle) : null;
     return { progSlug, majorSlug, baseTitle };
-}
+};
 
 export const pushUniversities = async () => {
     if (process.env.NODE_ENV === "production") return;
@@ -49,7 +92,7 @@ export const pushUniversities = async () => {
 
     console.log("Seeding Scholarships...");
     for (const item of scholarshipData) {
-        const vectorInput = `${item.name} by ${item.provider}. Support for: ${item.tags.join(", ")}. ${item.description}`;
+        const vectorInput = `${item.name} by ${item.provider}. Support for: ${item.tags.join(", ")}. ${item.description}`.toLowerCase();
         const vectorValues = await getVector(vectorInput);
 
         await db.collection("scholarships").doc(item.id).set({
@@ -64,7 +107,7 @@ export const pushUniversities = async () => {
         const schoolKey = university.slug;
         const allProgramSlugs = new Set<string>();
 
-            const collegeSummaries = programs.reduce((acc: any, prog: any) => {
+        const collegeSummaries = programs.reduce((acc: any, prog: any) => {
             const collegeName = prog.collegeData.college_name;
             const { progSlug, majorSlug } = getProgramSlug(prog.title);
             allProgramSlugs.add(progSlug);
@@ -85,17 +128,20 @@ export const pushUniversities = async () => {
             programs: Array.from(c.programs)
         }));
 
-        const uniVectorInput = `${university.name} (${university.slug || ''}) ${university.location.city} ${university.tags.join(" ")}`;
+        const inferredAliases = inferUniversityAliases(university.name);
+        const aliasSearchString = inferredAliases.join(" ");
+
+        const uniVectorInput = `${university.name} ${university.name.toLowerCase()} ${university.slug} ${aliasSearchString} ${university.location.city} ${university.location.city.toLowerCase()} ${university.tags.join(" ").toLowerCase()}`;
         const uniVectorValues = await getVector(uniVectorInput);
         
         await db.collection("universities").doc(university.slug).set({
             ...university,
+            aliases: inferredAliases,
             colleges: finalColleges,
             programSlugs: Array.from(allProgramSlugs),
             embedding: firestore.FieldValue.vector(uniVectorValues)
         });
 
-        // 2. Process Programs
         console.log(`Seeding Programs of ${university.name}...`);
         for (const prog of programs) {
             const { progSlug, baseTitle, majorSlug } = getProgramSlug(prog.title); 
@@ -127,7 +173,7 @@ export const pushUniversities = async () => {
 
                 schools.forEach((s: any) => s.tags?.forEach((t: string) => aggregatedTags.add(t)));
 
-                const progVectorInput = `${baseTitle}. Curriculum & Focus: ${Array.from(aggregatedTags).join(", ")}`;
+                const progVectorInput = `${baseTitle} ${baseTitle.toLowerCase()}. Focus fields: ${Array.from(aggregatedTags).join(", ").toLowerCase()}`;
                 const progVectorValues = await getVector(progVectorInput);
 
                 await progRef.update({
@@ -135,7 +181,7 @@ export const pushUniversities = async () => {
                     embedding: firestore.FieldValue.vector(progVectorValues)
                 });
             } else {
-                const progVectorInput = `${baseTitle}. Curriculum & Focus: ${prog.tags.join(", ")}`;
+                const progVectorInput = `${baseTitle} ${baseTitle.toLowerCase()}. Focus fields: ${prog.tags.join(", ").toLowerCase()}`;
                 const progVectorValues = await getVector(progVectorInput);
                 
                 await progRef.set({

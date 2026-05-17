@@ -9,6 +9,7 @@
 
   --font-serif: var(--font-serif), serif;
   --font-sans: var(--font-sans), sans-serif;
+  --background-image-architectural-grid: linear-gradient(to right, #eaf4ea 1px, transparent 1px), linear-gradient(to bottom, #eaf4ea 1px, transparent 1px);
 }
 
 @layer base {

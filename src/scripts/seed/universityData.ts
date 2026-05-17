@@ -269,7 +269,7 @@ export const seed_data: SeedItem[] = [
         ]
     },
     {
-        "university": {
+        university: {
             "name": "San Beda University",
             "slug": "san-beda",
             "heroImage": "https://25174313.fs1.hubspotusercontent-eu1.net/hub/25174313/hubfs/assets_moneymax/san-beda-university-scaled.jpg?width=900&height=600&name=san-beda-university-scaled.jpg",
@@ -285,7 +285,7 @@ export const seed_data: SeedItem[] = [
             },
             "tags": ["Benedictine Education", "Law Excellence", "Catholic", "Mendiola Consortium", "Lions Heritage", "Traditional", "Private Education", "Elite Network", "Governance", "Red and White Traditions"]
         },
-        "programs": [
+        programs: [
             { "title": "Bachelor of Laws", "code": "LLB", "tags": ["Juris Doctor", "Legal Excellence", "Top Bar Performance", "Litigation", "Governance"], "collegeData": { "college_name": "College of Law", "acronym": "COL", "tuition_range": { "min": 60000, "max": 80000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["LEB Accredited"] } },
             { "title": "BS in Accountancy", "code": "BSA", "tags": ["CPALE Performance", "Audit", "Taxation", "Financial Management", "Corporate Leadership"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 50000, "max": 65000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PAASCU Level III"] } },
             { "title": "BS in Business Administration", "code": "BSBA", "tags": ["Operations", "Marketing", "Human Resources", "Entrepreneurship"], "collegeData": { "college_name": "College of Arts and Sciences", "acronym": "CAS", "tuition_range": { "min": 50000, "max": 65000, "currency": "PHP", "billing_cycle": "Semester" }, "accreditation": ["PAASCU Accredited"] } },
@@ -294,7 +294,7 @@ export const seed_data: SeedItem[] = [
         ]
     },
     {
-        "university": {
+        university: {
             "name": "National University",
             "slug": "nu",
             "heroImage": "https://national-u.edu.ph/wp-content/uploads/2021/04/banner-nu-manila.jpg",
@@ -319,7 +319,7 @@ export const seed_data: SeedItem[] = [
         ]
     },
     {
-        "university": {
+        university: {
             "name": "Arellano University",
             "slug": "arellano",
             "heroImage": "https://tse1.mm.bing.net/th/id/OIP.Ak9AOCocf3VUrrx7iFxSQgHaFj?rs=1&pid=ImgDetMain&o=7&rm=3",

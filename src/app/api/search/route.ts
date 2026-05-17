@@ -19,46 +19,37 @@ export async function GET(req: Request) {
     const userQuery = searchParams.get("q");
 
     if (!userQuery) return Response.json({ error: "Missing query" }, { status: 400 });
+    
     try {
         const intentResponse = await groq.chat.completions.create({
             messages: [
                 { 
                     role: "system", 
-                    content: `Analyze the query for university search.
+                    content: `You are a search query router. Determine if the user is looking for an academic field/program study details or a university place to enroll.
 
-                    IDENTIFICATION LOGIC:
-                    - isProgram = true: The user is seeking INFORMATION ABOUT A FIELD OF STUDY.
-                    Keywords: "majors", "degrees", "programs", "curriculum", "what is", "subjects", "pre-med", "pre-law".
-                    Phrase Logic: "Best majors for [Career]" or "Degrees for [Career]" implies a program search.
-                    
-                    - isProgram = false: The user is seeking a PLACE TO ENROLL.
-                    Keywords: "schools", "colleges", "universities", "institutions", "where to study", "campuses", "institutions".
-                    Phrase Logic: "Best schools for [Major]" implies a university search.
-                    
-                    SLUG RULES:
-                    - Standardize all Bachelor degrees to: "bs-in-[subject]" or "ba-in-[subject]".
-                    - Include common variations to ensure array-contains-any hits.
-                    - Example: "Accountancy" -> { "isProgram": false, "slugCandidates": ["bs-in-accountancy", "bs-in-accounting"] }
+                    Rules:
+                    - Set isProgram to true if seeking info about majors, degrees, curriculum, or subjects.
+                    - Set isProgram to false if seeking locations, schools, or university campuses.
+                    - Extract programmatic slug candidates if matching a field of study.
 
-                    EXAMPLES:
-                    1. "Best majors for law school" -> { "isProgram": true, "slugCandidates": ["ba-in-political-science", "ba-in-philosophy", "ba-in-legal-management"] }
-                    2. "What are the subjects in BSCS?" -> { "isProgram": true, "slugCandidates": ["bs-in-computer-science"] }
-                    3. "Top universities for nursing" -> { "isProgram": false, "slugCandidates": ["bs-in-nursing"] }
-                    4. "Where can I study accountancy?" -> { "isProgram": false, "slugCandidates": ["bs-in-accountancy", "bs-in-accounting"] }
-                    
-                    Return JSON: { "isProgram": boolean, "slugCandidates": string[] }`
+                    Return ONLY a JSON object matching this schema. No conversation, no markdown blocks.`
                 },
-                { role: "user", content: userQuery }
+                { role: "user", content: `Query: "${userQuery}"` }
             ],
             temperature: 0,
             model: "qwen/qwen3-32b",
-            response_format: { type: "json_object" },
+            response_format: { 
+                type: "json_object"
+            },
         });
 
-        const parsed = JSON.parse(intentResponse.choices[0].message.content || "{}");
-        const isProgram = parsed.isProgram;
+        const rawContent = intentResponse.choices[0].message.content || "{}";
+        const parsed = JSON.parse(rawContent);
+        
+        const isProgram = !!parsed.isProgram;
         const slugCandidates = (parsed.slugCandidates || [])
             .map((s: string) => getSlugFromUserQuery(s))
+            .filter(Boolean)
             .slice(0, 10);
             
         const queryVector = await getVector(userQuery);
@@ -80,7 +71,6 @@ export async function GET(req: Request) {
                 }).get();
             }
         } else {
-            const queryChain = collectionRef;
             const searchOptions = {
                 vectorField: "embedding",
                 queryVector,
@@ -89,7 +79,7 @@ export async function GET(req: Request) {
             };
 
             if (slugCandidates.length > 0) {
-                snapshot = await queryChain
+                snapshot = await collectionRef
                     .where("programSlugs", "array-contains-any", slugCandidates)
                     .findNearest(searchOptions).get();
             }
