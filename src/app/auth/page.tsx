@@ -1,6 +1,7 @@
+"use server";
+
 import { Loader } from "lucide-react";
 import { Suspense } from "react";
-import AuthContent from "./AuthContent";
 import AuthParamsHandler from "./AuthParamsHandler";
 
 export default function AuthPage() {
@@ -10,9 +11,7 @@ export default function AuthPage() {
                 <Loader className="animate-spin text-mint-light" size={32} />
             </div>
         }>
-            <AuthParamsHandler>
-                {(redirectPath) => <AuthContent redirectPath={redirectPath} />}
-            </AuthParamsHandler>
+            <AuthParamsHandler />
         </Suspense>
     );
 }

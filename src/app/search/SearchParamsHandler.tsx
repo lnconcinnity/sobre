@@ -1,8 +1,9 @@
 "use client";
 import { useSearchParams } from "next/navigation";
+import SearchContent from "./SearchContent";
 
-export default function SearchParamsHandler({ children }: { children: (query: string | null) => React.ReactNode }) {
+export default function SearchParamsHandler() {
     const params = useSearchParams();
     const query = params.get("q");
-    return <>{children(query)}</>;
+    return <SearchContent query={query} />;
 }

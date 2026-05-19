@@ -1,8 +1,9 @@
 "use client";
 import { useSearchParams } from "next/navigation";
+import PostDetailsContent from "./PostDetailsContent";
 
-export default function PostDetailsParamsHandler({ children }: { children: (isRedirected: boolean) => React.ReactNode }) {
+export default function PostDetailsParamsHandler() {
     const params = useSearchParams();
     const isRedirected = params.get("redirected") === "true";
-    return <>{children(isRedirected)}</>;
+    return <PostDetailsContent isRedirected={isRedirected} />;
 }

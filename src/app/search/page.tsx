@@ -1,7 +1,8 @@
+"use server";
+
 import { Loader } from "lucide-react";
 import { Suspense } from "react";
 import SearchParamsHandler from "./SearchParamsHandler";
-import SearchContent from "./SearchContent";
 
 export default function SearchPage() {
     return (
@@ -10,9 +11,7 @@ export default function SearchPage() {
                 <Loader className="animate-spin text-mint-light" size={32} />
             </div>
         }>
-            <SearchParamsHandler>
-                {(query) => <SearchContent query={query} />}
-            </SearchParamsHandler>
+            <SearchParamsHandler />
         </Suspense>
     );
 }

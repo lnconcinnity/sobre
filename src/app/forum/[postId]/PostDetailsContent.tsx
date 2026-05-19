@@ -17,7 +17,7 @@ import ImageGallery from "./ImageGallery";
 import ImageDisplay from "./ImageDisplay";
 import { useToast } from "@/src/hooks/useToast";
 
-export default function PostDetailsPage({ isRedirected }: { isRedirected: boolean }) {
+export default function PostDetailsContent({ isRedirected }: { isRedirected: boolean }) {
     const { postId } = useParams();
     const { user } = useAuth();
     const { startTransition } = useTransition();

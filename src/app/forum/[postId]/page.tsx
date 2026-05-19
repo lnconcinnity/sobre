@@ -1,5 +1,6 @@
+"use server";
+
 import PostDetailsParamsHandler from "./PostDetailsParamsHandler";
-import PostDetailsContent from "./PostDetailsContent";
 import { Suspense } from "react";
 import { Loader } from "lucide-react";
 
@@ -10,9 +11,7 @@ export default function PostDetailsPage() {
                 <Loader className="animate-spin text-mint-light" size={32} />
             </div>
         }>
-            <PostDetailsParamsHandler>
-                {(isRedirected) => <PostDetailsContent isRedirected={isRedirected} />}
-            </PostDetailsParamsHandler>
+            <PostDetailsParamsHandler />
         </Suspense>
     );
 }

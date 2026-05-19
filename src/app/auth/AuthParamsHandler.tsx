@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import AuthContent from "./AuthContent";
 
-export default function AuthParamsHandler({ children }: { children: (redirectPath: string | null) => React.ReactNode }) {
+export default function AuthParamsHandler() {
     const params = useSearchParams();
     const redirectPath = params.get("redirect");
-    return <>{children(redirectPath)}</>;
+    return <AuthContent redirectPath={redirectPath} />;
 }
