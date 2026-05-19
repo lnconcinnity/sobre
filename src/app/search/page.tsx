@@ -1,10 +1,10 @@
-"use server";
+"use client";
 
 import { Loader } from "lucide-react";
 import { Suspense } from "react";
 import SearchParamsHandler from "./SearchParamsHandler";
 
-export default async function SearchPage() {
+export default function SearchPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-[#263127] flex items-center justify-center text-white/50">
