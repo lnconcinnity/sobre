@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
 export interface TransitionContextProps {
-    startTransition: (href: string) => void,
+    startTransition: (href?: string) => void,
     totalDuration: number,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _setSmootherInstance: (instance: any) => void,

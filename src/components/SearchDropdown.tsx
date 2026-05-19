@@ -176,7 +176,7 @@ export default function SearchDropdown({
                     onKeyDown={handleKeyDown}
                 />
             ) : (
-                <div className="magnetic sticky-cursor group relative border-b border-black/10 focus-within:border-mint-dark transition-colors">
+                <div className="sm:magnetic sticky-cursor group relative border-b border-black/10 focus-within:border-mint-dark transition-colors">
                     <input 
                         type="text" 
                         name={`sobre_unique_${name}_field`}

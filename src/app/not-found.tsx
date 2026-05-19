@@ -3,12 +3,15 @@
 import { useRef } from "react";
 import gsap, { useGSAP } from "../modules/gsap";
 import { useTransition } from "../hooks/useTransition";
+import InkStroke from "../components/InkStroke";
 
 export default function NotFound() {
     const container = useRef<HTMLDivElement>(null);
     const { startTransition } = useTransition();
 
     useGSAP(() => {
+        if (!container.current) return;
+        const paths = gsap.utils.toArray<SVGPathElement>(".brush-path");
         gsap.from(".not-found-content > *", {
             y: 40,
             opacity: 0,
@@ -16,6 +19,26 @@ export default function NotFound() {
             stagger: 0.15,
             ease: "power4.out",
             delay: 0.3
+        });
+        const tl = gsap.timeline({
+            onComplete: () => {
+                gsap.to(".ink-strokes .brush-path", {
+                drawSVG: "100% 100%", 
+                ease: "none",
+                scrollTrigger: {
+                    trigger: container.current,
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: true,
+                }
+                });
+            },
+        });
+        tl.to(paths, {
+            drawSVG: "100%",
+            duration: 2,
+            stagger: 0.1,
+            ease: "power2.inOut",
         });
     }, { scope: container });
 
@@ -37,6 +60,11 @@ export default function NotFound() {
                     transform: "translateZ(0)"
                 }}
             />
+            <div className="absolute inset-0 pointer-events-none select-none z-0">
+                <div className="ink-strokes absolute bottom-0 left-0 w-xs sm:w-md md:w-xl h-auto rotate-180">
+                    <InkStroke className="w-full h-full" />
+                </div>
+            </div>
             <section className="not-found-content relative z-10 w-full max-w-3xl px-6 text-center flex flex-col items-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-mint-dark/20 bg-mint-dark/4 mb-8 shadow-sm backdrop-blur-sm">
                     <span className="size-1.5 rounded-full bg-mint-dark animate-pulse" />

@@ -1,12 +1,13 @@
 import "./globals.css";
 import { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import SmoothScroller from "../components/SmoothScroller";
-import BlobCursor from "../components/BlobCursor";
+import SmoothScroller from "./SmoothScroller";
+import BlobCursor from "./BlobCursor";
 import Navbar from "../components/Navbar";
 import TransitionProvider from "../providers/TransitionProvider";
 import Footer from "../components/Footer";
 import { AuthProvider } from "../providers/AuthProvider";
+import ToastProvider from "../providers/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +32,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <AuthProvider>
                     <TransitionProvider>
                         <BlobCursor />
-                        <Navbar />
-                        <SmoothScroller>
-                            {children}
-                            <Footer />
-                        </SmoothScroller>
+                        <ToastProvider>
+                            <Navbar />
+                            <SmoothScroller>
+                                {children}
+                                <Footer />
+                            </SmoothScroller>
+                        </ToastProvider>
                     </TransitionProvider>
                 </AuthProvider>
             </body>

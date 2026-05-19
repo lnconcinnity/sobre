@@ -109,13 +109,14 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
 
     const getSmootherInstance = (instance: any) => smootherRef.current = instance;
 
-    const startTransition = (href: string) => {
+    const startTransition = (href?: string) => {
         if (!overlayRef.current) {
-            router.push(href);
+            if (href) router.push(href);
+            else router.back();
             return;
         }
 
-        const isSamePage = pathname === href.split('?')[0];
+        const isSamePage = href && pathname === href.split('?')[0];
         
         gsap.set(overlayRef.current, { pointerEvents: 'auto', xPercent: -100 });
         document.body.style.overflow = "hidden";
@@ -125,7 +126,8 @@ export default function TransitionProvider({ children, duration = 1, delay = 0.1
             duration: duration,
             ease: "power3.inOut",
             onComplete: () => {
-                router.push(href);
+                if (href) router.push(href);
+                else router.back();
                 if (isSamePage) {
                     playExitAnimation();
                 }

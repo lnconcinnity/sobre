@@ -9,10 +9,10 @@ import { useTransition } from "../hooks/useTransition";
 
 import InkStroke from "../components/InkStroke";
 import SearchDropdown from "../components/SearchDropdown";
-import MetricsSection from "../components/sections/MetricsSection";
-import ProceduresSection from "../components/sections/ProceduresSection";
-import ProcessHeader from "../components/sections/ProcessHeader";
-import TestimonialsSection from "../components/sections/TestimonialsSection";
+import MetricsSection from "./MetricsSection";
+import ProceduresSection from "./ProceduresSection";
+import ProcessHeader from "./ProcessHeader";
+import TestimonialsSection from "./TestimonialsSection";
 import FemaleBloggerPNG from "../assets/female-blogger.png";
 
 interface TrendingSearchItem {
@@ -72,7 +72,7 @@ export default function HomePage() {
 
         const tl = gsap.timeline({
             onComplete: () => {
-                gsap.to(".bottom-left-stroke .brush-path", {
+                gsap.to(".ink-strokes .brush-path", {
                 drawSVG: "100% 100%", 
                 ease: "none",
                 scrollTrigger: {
@@ -114,7 +114,7 @@ export default function HomePage() {
         <>
         <div ref={welcomeContainer} className="relative min-h-screen overflow-hidden bg-[#f9fdf9]">
             <div className="absolute inset-0 pointer-events-none select-none z-0">
-                <div className="bottom-left-stroke absolute bottom-0 left-0 w-xs sm:w-md md:w-xl h-auto rotate-180">
+                <div className="ink-strokes absolute bottom-0 left-0 w-xs sm:w-md md:w-xl h-auto rotate-180">
                     <InkStroke className="w-full h-full" />
                 </div>
             </div>
@@ -145,7 +145,7 @@ export default function HomePage() {
                         <div className="w-full">
                             <SearchDropdown suggestions={trendingSearches} onSearch={execSearch} />
                             {trendingSearches.length > 0 && (
-                                <div className="mt-5 animate-fade-in">
+                                <div className="mt-5">
                                     <span className="block text-xs font-black uppercase tracking-wider text-neutral-400 mb-2">
                                     Trending Analytics Searches
                                     </span>

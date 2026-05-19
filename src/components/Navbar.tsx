@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Menu, X, Search } from "lucide-react"; // Premium clean iconography
+import { Menu, X, Search, Mail, User } from "lucide-react"; // Premium clean iconography
 import gsap, { useGSAP } from "../modules/gsap";
 import { useNavStore } from "../store/useNavStore";
 import SearchDropdown from "./SearchDropdown";
 import { useTransition } from "../hooks/useTransition";
+import { useAuth } from "../hooks/useAuth";
 
 const NAV_LINKS = [
 	{ label: "Company", href: "/company" },
@@ -15,7 +16,7 @@ const NAV_LINKS = [
 	{ label: "Contact", href: "/contact" },
 ];
 
-const VALID_ROUTES = [...NAV_LINKS.map(link => link.href), "/", "/search"];
+const VALID_ROUTES = [...NAV_LINKS.map(link => link.href), "/", "/search", "/dashboard"];
 const HIDDEN_NAV_AT_ROUTES = new Set(["/", "/search", "/company"]);
 
 interface TrendingSearchItem {
@@ -25,6 +26,7 @@ interface TrendingSearchItem {
 }
 
 export default function Navbar() {
+	const { user, loading } = useAuth();
 	const navRef = useRef<HTMLHeadingElement>(null);
 	const mobileMenuRef = useRef<HTMLDivElement>(null);
 	const pathname = usePathname();
@@ -109,6 +111,7 @@ export default function Navbar() {
 		setIsMenuOpen(false);
 		startTransition(`/search?q=${encodeURIComponent(q.trim())}`);
 	};
+
 	return (
 		<>
 		<nav 
@@ -146,6 +149,35 @@ export default function Navbar() {
 					onSearch={(q) => execSearch(q)} 
 				/>
 			</div>
+			{!loading && (
+                <div className="hidden md:flex items-center gap-4 border-l border-black/10 pl-4">
+                    {user ? (
+                        <button 
+                            onClick={() => handleLink("/dashboard")}
+                            className="magnetic rounded-full flex items-center gap-2 cursor-pointer group"
+                        >
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-900 group-hover:text-mint-dark transition-colors">
+                                {user.displayName?.split(" ")[0] || "Profile"}
+                            </span>
+                            <div className="size-7 rounded-full bg-neutral-100 flex items-center justify-center border border-black/5">
+                                {user.photoURL ? (
+                                    <Image src={user.photoURL} alt="Avatar" width={28} height={28} className="rounded-full" />
+                                ) : (
+                                    <User size={14} className="text-neutral-500" />
+                                )}
+                            </div>
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={() => handleLink("/auth")}
+                            className="rounded-full magnetic flex items-center gap-2 cursor-pointer text-neutral-500 hover:text-neutral-900 transition-colors"
+                        >
+                            <Mail size={14} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Login</span>
+                        </button>
+                    )}
+                </div>
+            )}
 			<div className="flex md:hidden items-center gap-2">
 				<button 
 					onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -180,7 +212,7 @@ export default function Navbar() {
 								}`}
 						>
 							<span className="flex items-center gap-2.5 transition-transform duration-300 group-hover:translate-x-1">
-								<span className={`size-1.5 rounded-full transition-all duration-300 
+								<span className={`ml-2 size-1.5 rounded-full transition-all duration-300 
 									${isActive ? "bg-mint-dark animate-pulse" : "bg-neutral-300 group-hover:bg-mint-dark group-hover:scale-125"}`} 
 								/>
 								{link.label}
@@ -195,11 +227,43 @@ export default function Navbar() {
 				})}
 			</div>
 			<div className="w-full h-px bg-linear-to-r from-transparent via-black/5 to-transparent relative z-10" />
+			{!loading && (
+				<div className="px-3 relative z-10">
+					{user ? (
+						<button
+							onClick={() => handleLink("/dashboard")}
+							className="w-full flex items-center justify-between py-3 px-4 bg-neutral-900 text-white rounded-2xl cursor-pointer active:scale-[0.98] transition-transform"
+						>
+							<div className="flex items-center gap-3">
+								<div className="rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/20">
+									{user.photoURL ? (
+										<Image src={user.photoURL} alt="Avatar" width={32} height={32} />
+									) : (
+										<User size={14} className="text-white" />
+									)}
+								</div>
+								<span className="text-[10px] font-black uppercase tracking-widest">
+									{user.displayName || "My Workspace"}
+								</span>
+							</div>
+							<span className="text-[9px] font-bold opacity-50">DASHBOARD</span>
+						</button>
+					) : (
+						<button
+							onClick={() => handleLink("/auth")}
+							className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-neutral-200 rounded-2xl text-neutral-900 hover:bg-neutral-50 transition-colors cursor-pointer"
+						>
+							<Mail size={14} />
+							<span className="text-[10px] font-black uppercase tracking-widest">Login / Authenticate</span>
+						</button>
+					)}
+				</div>
+			)}
 			<div className="relative z-10 flex flex-col gap-2.5 w-full px-3">
 				<div className="flex items-center gap-2 text-[9px] font-black tracking-[0.3em] uppercase text-neutral-400">
 					<Search className="size-3 text-neutral-400 shrink-0" /> Search the Database
 				</div>
-				<SearchDropdown 
+				<SearchDropdown
 					label="Search courses, guides, requirements..." 
 					name="mobile-nav-search" 
 					variant="lean" 

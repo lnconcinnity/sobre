@@ -18,6 +18,15 @@ export default function BlobCursor() {
     });
 
     useGSAP(() => {
+        if (typeof window === "undefined") return;
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isMobileScreen = window.innerWidth < 640;
+        
+        if (isTouchDevice || isMobileScreen) {
+            if (cursorRef.current) cursorRef.current.style.display = "none";
+            return;
+        }
+
         if (!cursorRef.current) return;
         const cursor = cursorRef.current;
         const s = state.current;
@@ -77,6 +86,29 @@ export default function BlobCursor() {
         const initializedElements = new WeakSet();
         const PADDING = 50;
 
+        const forceReleaseMagnet = (targetEl: HTMLElement, isLockedElement: boolean) => {
+            if (s.latchedEl === targetEl) {
+                s.isLatched = false;
+                s.latchedEl = null;
+            }
+            
+            const exitEase = isLockedElement ? "power4.out" : "elastic.out(1, 0.3)";
+            const exitDuration = isLockedElement ? 0.4 : 0.6;
+            
+            gsap.killTweensOf(cursor);
+            gsap.to(cursor, {
+                width: 24,
+                height: 24,
+                borderRadius: "100%",
+                duration: exitDuration,
+                ease: exitEase
+            });
+            
+            if (!isLockedElement && document.contains(targetEl)) {
+                gsap.to(targetEl, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+            }
+        };
+
         const initMagnet = (el: HTMLElement) => {
             if (initializedElements.has(el)) return;
             initializedElements.add(el);
@@ -86,7 +118,7 @@ export default function BlobCursor() {
 
             const magnetMove = (e: MouseEvent) => {
                 if (!document.contains(el)) {
-                    if (s.latchedEl === el) magnetLeave(isLocked);
+                    if (s.latchedEl === el) forceReleaseMagnet(el, isLocked);
                     return;
                 }
 
@@ -98,7 +130,7 @@ export default function BlobCursor() {
 
                 if (distX > (currentRect.width / 2) + PADDING || distY > (currentRect.height / 2) + PADDING) {
                     if (s.isLatched && s.latchedEl === el && !forceOut) {
-                        magnetLeave(isLocked);
+                        forceReleaseMagnet(el, isLocked);
                         forceOut = true;
                     }
                     return;
@@ -116,7 +148,6 @@ export default function BlobCursor() {
                 const rawRadius = elStyles.borderRadius;
                 const targetRadius = rawRadius.split(' ').map(value => {
                     if (value.includes('%')) return value;
-                    
                     const pxValue = parseFloat(value);
                     if (isNaN(pxValue)) return value;
                     return `${pxValue + 5}px`;
@@ -156,31 +187,8 @@ export default function BlobCursor() {
                 }
             };
 
-            const magnetLeave = (isLockedElement: boolean) => {
-                if (s.latchedEl === el) {
-                    s.isLatched = false;
-                    s.latchedEl = null;
-                }
-                
-                const exitEase = isLockedElement ? "power4.out" : "elastic.out(1, 0.3)";
-                const exitDuration = isLockedElement ? 0.4 : 0.6;
-                
-                gsap.killTweensOf(cursor);
-                gsap.to(cursor, {
-                    width: 24,
-                    height: 24,
-                    borderRadius: "100%",
-                    duration: exitDuration,
-                    ease: exitEase
-                });
-                
-                if (!isLockedElement) {
-                    gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
-                }
-            };
-
             const handleOnLeave = () => {
-                if (s.isLatched && s.latchedEl === el) magnetLeave(isLocked);
+                if (s.isLatched && s.latchedEl === el) forceReleaseMagnet(el, isLocked);
                 forceOut = false;
             };
 
@@ -189,6 +197,9 @@ export default function BlobCursor() {
         };
 
         const observer = new MutationObserver(() => {
+            if (s.isLatched && s.latchedEl && !document.contains(s.latchedEl)) {
+                forceReleaseMagnet(s.latchedEl, s.latchedIsLocked);
+            }
             document.querySelectorAll(".magnetic").forEach((el) => initMagnet(el as HTMLElement));
         });
 
@@ -213,6 +224,6 @@ export default function BlobCursor() {
     }, [pathname]);
 
     return (
-        <div ref={cursorRef} id="custom-cursor" className={`not-md:invisible fixed top-0 left-0 size-6 border border-mint-dark pointer-events-none z-9999 ${hasMoved ? 'opacity-100' : 'opacity-0'}`} />
+        <div ref={cursorRef} id="custom-cursor" className={`not-sm:invisible fixed top-0 left-0 size-6 border border-mint-dark pointer-events-none z-9999 ${hasMoved ? 'opacity-100' : 'opacity-0'}`} />
     );
 }

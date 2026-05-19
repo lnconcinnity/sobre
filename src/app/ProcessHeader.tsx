@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import gsap from "gsap";
-import { useGSAP } from "../../modules/gsap";
+import { useGSAP } from "../modules/gsap";
 import { Workflow, CircleArrowDown } from "lucide-react";
 
 export default function ProcessHeader() {

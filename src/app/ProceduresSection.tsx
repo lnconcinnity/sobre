@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import gsap, { useGSAP } from "../../modules/gsap";
+import gsap, { useGSAP } from "../modules/gsap";
 import { useTransition } from "@/src/hooks/useTransition";
 import { ArrowRight } from "lucide-react";
 

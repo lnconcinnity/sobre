@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import gsap from "gsap";
-import { useGSAP } from "../../modules/gsap";
+import { useGSAP } from "../modules/gsap";
 import { Search, CheckCircle, MessageSquare, Sparkles, ShieldCheck, GraduationCap } from "lucide-react";
 
 export default function MetricsSection() {

@@ -1,41 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import gsap, { useGSAP } from "../../modules/gsap";
-import { ProgramAccordion } from "@/src/components/ProgramAccordion";
-import { UniversityCard } from "@/src/components/UniversityCard";
+import { 
+    Compass, 
+    AlertTriangle, 
+    Sparkles, 
+    Database, 
+    Layers, 
+    HelpCircle 
+} from "lucide-react";
+import gsap, { useGSAP, ScrollSmoother } from "../../modules/gsap";
 import { useNavStore } from "@/src/store/useNavStore";
 import { useInView } from "@/src/hooks/useInView";
 import SearchDropdown from "@/src/components/SearchDropdown";
 import { useTransition } from "@/src/hooks/useTransition";
+import { SingleUniversityView } from "./SingleUniversityView";
+import { MultipleUniversitiesView } from "./MultipleUniversitiesView";
+import { ProgramsPaginationView } from "./ProgramsPaginationView";
+import { ScholarshipsView } from "./ScholarshipsView";
+import ThreadItem from "@/src/components/ThreadItem";
 
 export default function SearchPage() {
     const { startTransition } = useTransition();
     const searchParams = useSearchParams();
     const query = searchParams.get("q");
     const setHeroVisible = useNavStore((state) => state.setHeroVisible);
-    const [resultsContainer, inView] = useInView({ threshold: 0.5, });
+    const [resultsContainer, inView] = useInView({ threshold: 0.7 });
     
-    const [scholarships, setScholarships] = useState<any[]>([]);
-    const [status, setStatus] = useState("idle"); // -1=err, 0=idle, 1=search, 2=reason, 3=done, 4=none
+    const [status, setStatus] = useState("idle"); // "error" | "ignored" | "searching" | "reasoning" | "completed"
+    const [intent, setIntent] = useState("multiple_universities"); // "scholarships" | "single_university" | "multiple_universities" | "programs"
     const [results, setResults] = useState<any[]>([]);
-    const [intent, setIntent] = useState("universities");
-    const [narratives, setNarratives] = useState<any>(null);
-    const [loaderText, setLoaderText] = useState("Consulting the archives...");
-    const [concerns, setConcerns] = useState<any[]>([]);
-    const [seconds, setSeconds] = useState(0);
+    const [scholarships, setScholarships] = useState<any[]>([]);
     const [threads, setThreads] = useState<any[]>([]);
+    const [narratives, setNarratives] = useState<any>(null);
+    const [selectedUniversity, setSelectedUniversity] = useState<any>(null);
+    const [loaderText, setLoaderText] = useState("Accessing localized vector indexes...");
+    const [seconds, setSeconds] = useState(0);
 
-    const universitiesContainerRef = useRef(null);
-    const loaderRef = useRef(null);
-    const hintRef = useRef(null);
+    const loaderRef = useRef<HTMLDivElement>(null);
+    const hintRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setHeroVisible(inView);
     }, [inView, setHeroVisible]);
 
-   useEffect(() => {
+    useEffect(() => {
+        setSelectedUniversity(null);
+    }, [query]);
+
+    useEffect(() => {
         if (!query) return;
         const controller = new AbortController();
         const runPipeline = async () => {
@@ -54,98 +69,131 @@ export default function SearchPage() {
 
                 const searchRes = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
                 const searchData = await searchRes.json();
-                const originalResults = searchData.results || [];
-                const threads = searchData.threads || [];
-                const intent = searchData.intent;
+                
+                let originalResults = searchData.results || [];
+                const matchedThreads = searchData.threads || [];
+                const detectedIntent = searchData.intent || "multiple_universities";
+                const slugCandidates = searchData.slugCandidates || []; 
 
-                setIntent(intent);
+                setIntent(detectedIntent);
                 setResults(originalResults);
-                setThreads(threads);
+                setThreads(matchedThreads);
 
                 const scholarshipRes = await fetch(`/api/search/scholarships?q=${encodeURIComponent(query)}`, { signal: controller.signal });
                 const scholarshipData = await scholarshipRes.json();
                 setScholarships(scholarshipData.results || []);
 
-                if (originalResults.length > 0) {
+                if (originalResults.length > 0 || detectedIntent === "scholarships") {
                     setStatus("reasoning");
+                    
+                    const leanResults = originalResults.map((item: any) => ({
+                        id: item.id,
+                        slug: item.slug,
+                        name: item.name
+                    }));
+
                     const narrativeRes = await fetch("/api/search/reason", {
                         method: "POST",
-                        body: JSON.stringify({ query, searchResults: originalResults, intent }),
+                        body: JSON.stringify({ 
+                            query, 
+                            leanResults,
+                            intent: detectedIntent,
+                            slugCandidates
+                        }),
                         signal: controller.signal
                     });
 
                     const aiData = await narrativeRes.json();
                     const aiResults = aiData.results || {}; 
-                    const concernArray = aiData.concerns || [];
+                    const strictlyValidSlugs = aiData.strictlyValidSlugs || [];
+
+                    if (detectedIntent !== "scholarships" && strictlyValidSlugs.length > 0) {
+                        originalResults = originalResults.filter((item: any) => {
+                            const itemKey = item.slug || item.id;
+                            return strictlyValidSlugs.includes(itemKey);
+                        });
+                        
+                        setResults(originalResults);
+                    }
+
+                    if (originalResults.length === 0 && detectedIntent !== "scholarships") {
+                        console.warn("No structural assets survived the alignment filters.");
+                        setStatus("ignored");
+                        return;
+                    }
 
                     const reconciledNarratives: any = {};
-
                     originalResults.forEach((item: any) => {
-                        const originalSlug = item.slug;
-                        if (aiResults[originalSlug]) {
-                            reconciledNarratives[originalSlug] = aiResults[originalSlug];
+                        const slugKey = item.slug || item.id;
+                        if (aiResults[slugKey]) {
+                            reconciledNarratives[slugKey] = aiResults[slugKey];
                         } else {
-                            const fuzzyKey = Object.keys(aiResults).find(k => k.toLowerCase() === originalSlug.toLowerCase());
-                            reconciledNarratives[originalSlug] = fuzzyKey ? aiResults[fuzzyKey] : {
-                                why: "Expert analysis specifically for this curriculum is being finalized.",
-                                projected_tf: "Fetching rates...",
-                                footnotes: "Logistics data currently updating."
+                            reconciledNarratives[slugKey] = {
+                                why: "Platform intelligence maps are finalizing specialized structural breakdowns.",
+                                projected_tf: "Calculating semi-annual base cost metrics...",
+                                footnotes: "Logistical details parsing."
                             };
                         }
                     });
 
-                    setConcerns(concernArray);
                     setNarratives(reconciledNarratives);
                     setStatus("completed");
-                } else setStatus("ignored");
+                } else {
+                    setStatus("ignored");
+                }
             } catch (err: any) {
                 if (err.name === 'AbortError') return;
-                console.error(err);
+                console.error("Pipeline Exception Captured:", err);
                 setStatus("error");
             }
         };
+
         runPipeline();
         return () => controller.abort();
     }, [query]);
+
     useEffect(() => {
-        if (status === "searching" || status === "reasoning") return;
+        if (status !== "searching" && status !== "reasoning") return;
         const timer = setInterval(() => setSeconds(prev => prev + 1), 1000);
         return () => clearInterval(timer);
     }, [status]);
+
+    useEffect(() => {
+        if (status !== "searching" && status !== "reasoning") return;
+        const ambientPrompts = [
+            "Deconstructing semantic vector strings...",
+            "Sifting through user community discussions...",
+            "Calculating historical institutional tuition curves...",
+            "Predicting geographic logistical friction indexes...",
+            "Compiling unified scholarship grant registers..."
+        ];
+        let step = 0;
+        const interval = setInterval(() => {
+            setLoaderText(ambientPrompts[step % ambientPrompts.length]);
+            step++;
+        }, 2200);
+        return () => clearInterval(interval);
+    }, [status]);
+
     useGSAP(() => {
-        if (status === "completed") {
+        if (status === "completed" && loaderRef.current) {
             gsap.to(loaderRef.current, {
                 opacity: 0,
-                y: -50,
-                duration: 0.8,
-                ease: "power4.inOut",
+                y: -30,
+                duration: 0.6,
+                ease: "power3.inOut",
                 onComplete: () => {
                     gsap.set(loaderRef.current, { display: "none" });
                 }
             });
         }
     }, [status]);
-    useEffect(() => {
-        if (status === "searching" || status === "reasoning") return;
-        const messages = [
-            "Checking admission rates...",
-            "Analyzing campus culture...",
-            "Predicting SLEX traffic peaks...",
-            "Sifting through the vibes..."
-        ];
-        let i = 0;
-        const interval = setInterval(() => {
-            setLoaderText(messages[i % messages.length]);
-            i++;
-        }, 2500);
-        return () => clearInterval(interval);
-    }, [status]);
 
     useGSAP(() => {
-        if (seconds === 6 || seconds === 12) {
+        if ((seconds === 6 || seconds === 12) && hintRef.current) {
             gsap.fromTo(hintRef.current, 
-                { y: 20, opacity: 0 }, 
-                { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
+                { y: 15, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }
             );
         }
     }, [seconds]);
@@ -153,180 +201,221 @@ export default function SearchPage() {
     const execSearch = (q: string) => {
         if (!q.trim()) return;
         startTransition(`/search?q=${encodeURIComponent(q.trim())}`);
-    }
+    };
 
     return (
-        <div key={query} className="relative min-h-screen bg-neutral-50" ref={resultsContainer}>
+        <div key={query} className="relative min-h-screen bg-[#fbfdfb] text-neutral-900 selection:bg-mint-dark/20 selection:text-neutral-950">
+            <div className="h-screen absolute inset-0 size-full z-0 pointer-events-none invisible" ref={resultsContainer} />
             {status === "error" && (
-                <div className="h-screen flex flex-col items-center justify-center gap-4">
-                    <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">
-                        Oops, something went wrong!
+                <div className="h-screen w-full flex flex-col items-center justify-center p-6 text-center">
+                    <div className="p-4 rounded-full bg-red-50 border border-red-100 text-red-500 mb-6 shadow-xs">
+                        <AlertTriangle size={32} strokeWidth={1.5} />
+                    </div>
+                    <h2 className="text-3xl font-black uppercase tracking-tighter text-neutral-950 max-w-md leading-none mb-3">
+                        Pipeline Registry Disruption
                     </h2> 
-                    <p className="text-neutral-400 text-sm font-medium italic">
-                        Please try again later or rephrase your query.
+                    <p className="text-neutral-500 text-xs font-semibold uppercase tracking-wider max-w-xs leading-relaxed">
+                        The matrix database encountered a lookup error. Re-verify your network link or parse query parameters again.
                     </p>
                 </div>
             )}
             {status === "ignored" && (
-                <div className="h-screen flex flex-col items-center justify-center gap-4 **:transition-none">
-                    <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">
-                        We couldn&apos;t make sense of that!
+                <div className="h-screen w-full flex flex-col items-center justify-center p-6 text-center bg-radial from-white via-[#fbfdfb] to-neutral-50/50">
+                    <div className="p-4 rounded-full bg-neutral-900 text-white mb-6 shadow-xl relative group">
+                        <div className="absolute inset-0 rounded-full bg-mint-light opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-500" />
+                        <Compass size={32} strokeWidth={1.5} className="animate-spin-slow" />
+                    </div>
+                    <h2 className="text-3xl font-black uppercase tracking-tighter text-neutral-950 max-w-md leading-none mb-2">
+                        Unrecognized Query Vector
                     </h2> 
-                    <p className="text-neutral-400 text-sm font-medium italic">
-                        Try searching for a specific degree, program, or university.
+                    <p className="text-neutral-400 text-xs font-medium uppercase tracking-widest max-w-xs">
+                        No schools, programs, or financial grants correspond to this input path.
                     </p>
-                    <SearchDropdown label="Search..." name="nav-search" onSearch={(q) => execSearch(q)} />
+                    <div className="text-left w-full max-w-xs">
+                        <SearchDropdown label="Re-index search parameters..." name="nav-search" onSearch={(q) => execSearch(q)} />
+                    </div>
                 </div>
             )}
-            {status === "searching" || status === "reasoning" ? (
+
+            {(status === "searching" || status === "reasoning") && (
                 <div 
                     ref={loaderRef} 
-                    className="fixed h-screen inset-0 bg-white z-200 flex flex-col items-center justify-center p-6 text-center"
+                    className="fixed inset-0 h-screen bg-white z-200 flex flex-col items-center justify-center p-6 text-center select-none"
                 >
-                    <div className="relative mb-8">
-                        <div className="w-16 h-16 border-2 border-neutral-100 border-t-mint-dark rounded-full animate-spin" />
+                    <div className="relative mb-8 flex items-center justify-center">
+                        <div className="w-20 h-20 border border-neutral-100 rounded-full absolute" />
+                        <div className="w-20 h-20 border-t border-mint-dark rounded-full animate-spin absolute" />
+                        <div className="w-12 h-12 border border-dashed border-neutral-200 rounded-full absolute animate-spin-reverse" />
+                        {status === "searching" ? (
+                            <Database size={18} className="text-neutral-400 animate-pulse" />
+                        ) : (
+                            <Sparkles size={18} className="text-mint-dark animate-pulse" />
+                        )}
                     </div>
                     
-                    <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">
-                        Finding your path...
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-mint-dark mb-2 flex items-center gap-1.5">
+                        <Layers size={12} /> Unified Academic Engine
+                    </span>
+                    <h2 className="text-3xl font-black uppercase tracking-tighter text-neutral-950 mb-1">
+                        Synthesizing Context Arrays
                     </h2>
-                    <p className="text-neutral-400 text-sm font-medium animate-pulse italic min-h-5">
+                    <p className="text-neutral-400 text-xs font-medium italic min-h-5 transition-all duration-300">
                         {loaderText}
                     </p>
 
-                    <div ref={hintRef} className="h-6 mt-4 opacity-0">
+                    <div ref={hintRef} className="h-6 mt-8 opacity-0">
                         {seconds >= 12 ? (
-                            <span className="text-[10px] text-orange-400 font-bold uppercase tracking-widest">Hang on, some transference... we&apos;re deep in thought!</span>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-100 rounded-md text-amber-600 font-bold uppercase text-[9px] tracking-widest">
+                                <HelpCircle size={10} /> Query requires deep thematic cross-referencing. Stand by.
+                            </div>
                         ) : seconds >= 6 ? (
-                            <span className="text-[10px] text-mint-dark font-bold uppercase tracking-widest">Almost there, some glitters and sprinkles...</span>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-neutral-50 border border-neutral-200 rounded-md text-neutral-500 font-bold uppercase text-[9px] tracking-widest">
+                                <Sparkles size={10} className="text-mint-dark" /> Merging system matrices with live peer thread data...
+                            </div>
                         ) : null}
                     </div>
                 </div>
-            ) : null}
+            )}
 
-            <section className={`py-12 px-6 transition-opacity duraiton-1000 ease-out ${status === "completed" ? "opacity-100" : "opacity-0"}`}>
-                <div className="max-w-7xl mx-auto flex flex-col items-center">
-                    <h2 className="text-5xl font-black text-center text-black uppercase tracking-wide mb-12">
-                        Here&apos;s what we got
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full" ref={universitiesContainerRef}>
-                        {(results || []).map((item: any) => (
-                            intent === "programs" ? (
-                                <ProgramAccordion key={item.id} item={item} narratives={narratives} />
-                            ) : (
-                                <UniversityCard key={item.slug} item={item} narrative={narratives?.[item.slug]} />
-                            )
-                        ))}
-                    </div>
-                    {concerns.length > 0 && (
-                        <div className="mt-4 flex flex-col items-center gap-2">
-                            {concerns.map((item, i) => (
-                                <div key={i} className="flex items-center gap-2 px-4 py-1.5 bg-amber-50 border border-amber-200 rounded-full">
-                                    <span className="text-[10px] font-black text-amber-600 uppercase tracking-tighter">Note:</span>
-                                    <p className="text-[11px] font-medium text-amber-800 italic">{typeof item === 'object' ? item.note : item}</p>
-                                </div>
-                            ))}
+            {status === "completed" && (
+                <>
+                {intent === "single_university" && results.length > 0 ? (
+                    <SingleUniversityView 
+                        item={results[0]} 
+                        narrative={narratives?.[results[0].slug || results[0].id]} 
+                    />
+                ) : selectedUniversity ? (
+                    <SingleUniversityView 
+                        item={selectedUniversity} 
+                        narrative={narratives?.[selectedUniversity.slug || selectedUniversity.id]} 
+                        onBack={() => {
+                            setSelectedUniversity(null);
+                            setTimeout(() => {
+                                const smoother = ScrollSmoother.get();
+                                if (smoother) smoother.scrollTop(0);
+                            }, 50);
+                        }}
+                    />
+                ) : intent === "scholarships" && results.length > 0 ? (
+                    <ScholarshipsView 
+                        results={results}
+                    />
+                ) : intent === "programs" && results.length > 0 ? (
+                    <ProgramsPaginationView 
+                        results={results}
+                        narratives={narratives}
+                    />
+                ) : intent === "multiple_universities" && results.length > 0 ? (
+                    <MultipleUniversitiesView 
+                        results={results}
+                        narratives={narratives}
+                        onSelectUniversity={(item) => setSelectedUniversity(item)}
+                    />
+                ) : (
+                    <div className="w-full max-w-7xl mx-auto py-12 px-6">
+                        <div className="flex flex-col items-center justify-center text-center mb-12">
+                            <span className="px-3 py-1 bg-neutral-900 text-white rounded-md text-[9px] font-black uppercase tracking-widest mb-3">
+                                Intent Layer: {intent.replace("_", " ")}
+                            </span>
+                            <h2 className="text-4xl font-black uppercase tracking-tight text-neutral-950">
+                                Platform Search Index Matrix
+                            </h2>
                         </div>
-                    )}
-                    {scholarships.length > 0 && (
-                        <div className="w-full mt-12 border-t border-neutral-200 pt-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                            <div className="flex flex-col items-center mb-12">
-                                <span className="px-3 py-1 bg-mint-light/10 border border-mint-dark/20 rounded-full text-[10px] font-black text-mint-dark uppercase tracking-[0.2em] mb-4">
-                                    Financial Support
+                        <div className="p-12 border-2 border-dashed border-neutral-200 rounded-4xl text-center bg-white/50">
+                            <p className="text-neutral-400 text-sm font-medium italic">
+                                Specialized layout switch logic target node ready for structural generation.
+                            </p>
+                        </div>
+                    </div>
+                )}
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-24 select-none">
+                    {scholarships.length > 0 && intent !== "scholarships" && (
+                        <div className="w-full mt-20 border-t border-neutral-100 pt-16">
+                            <div className="flex flex-col items-center text-center mb-12">
+                                <span className="px-2.5 py-1 bg-mint-dark/5 border border-mint-dark/10 rounded-md text-[9px] font-black text-mint-dark uppercase tracking-[0.2em] mb-3">
+                                    Financial Provisions Matrix
                                 </span>
-                                <h2 className="text-4xl font-black text-center text-black uppercase tracking-tight">
-                                    We Got You Covered
+                                <h2 className="text-3xl font-black text-neutral-950 uppercase tracking-tighter sm:text-4xl">
+                                    Matching Grants & Financial Aid
                                 </h2>
-                                <p className="text-neutral-400 text-sm mt-2 font-medium">
-                                    Grants and external scholarships matching your query
+                                <p className="text-neutral-400 text-xs sm:text-sm mt-1.5 font-semibold uppercase tracking-wider max-w-md">
+                                    Active auxiliary stipends aligned to this specific vector criteria
                                 </p>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                                 {scholarships.map((s: any) => (
-                                    <div key={s.id} className="group p-6 bg-white border border-neutral-100 rounded-3xl hover:border-neutral-900 transition-all duration-500 flex flex-col justify-between">
+                                    <div 
+                                        key={s.id} 
+                                        className="group bg-white border border-neutral-100 rounded-2xl p-6 hover:border-neutral-950 hover:shadow-xs transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+                                    >
                                         <div>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">{s.provider}</span>
+                                            <div className="flex justify-between items-center gap-4 mb-4 pb-3 border-b border-neutral-50">
+                                                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest truncate">
+                                                    {s.provider}
+                                                </span>
                                                 {s.tags?.includes("Female-Only") && (
-                                                    <span className="text-[8px] font-black text-pink-500 bg-pink-50 px-2 py-0.5 rounded-full uppercase">Women Only</span>
+                                                    <span className="text-[8px] font-black text-pink-600 bg-pink-50 border border-pink-100 px-2 py-0.5 rounded-sm uppercase tracking-wider shrink-0">
+                                                        Women Only
+                                                    </span>
                                                 )}
                                             </div>
-                                            <h4 className="text-lg font-bold text-black leading-tight mb-2 uppercase">{s.name}</h4>
-                                            <p className="text-[11px] text-neutral-500 font-medium line-clamp-3">{s.description}</p>
+                                            <h4 className="text-base font-black text-neutral-950 uppercase tracking-tight leading-snug group-hover:text-mint-dark transition-colors duration-200">
+                                                {s.name}
+                                            </h4>
+                                            <p className="text-[11px] text-neutral-500 font-medium leading-relaxed mt-2 line-clamp-3">
+                                                {s.description}
+                                            </p>
                                         </div>
-                                        
-                                        <div className="mt-6 flex flex-wrap gap-1">
-                                            {s.tags?.slice(0, 3).map((tag: string) => (
-                                                <span key={tag} className="text-[8px] font-bold text-neutral-400 bg-neutral-50 px-2 py-1 rounded-lg uppercase">
-                                                    {tag}
-                                                </span>
-                                            ))}
+                                        <div className="mt-6">
+                                            <div className="flex flex-wrap gap-1 mb-4">
+                                                {s.tags?.slice(0, 3).map((tag: string) => (
+                                                    <span key={tag} className="text-[8px] font-bold text-neutral-400 bg-neutral-50 border border-neutral-100 px-1.5 py-0.5 rounded-xs uppercase tracking-wide">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <a 
+                                                href={s.links?.apply} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="magnetic flex items-center justify-center w-full py-2.5 bg-neutral-950 text-white rounded-xl text-center text-[10px] font-black uppercase tracking-widest hover:bg-mint-dark transition-colors duration-200"
+                                            >
+                                                Apply Now
+                                            </a>
                                         </div>
-                                        
-                                        <a 
-                                            href={s.links?.apply} 
-                                            target="_blank" 
-                                            className="magnetic mt-4 w-full py-3 bg-neutral-900 text-white rounded-2xl text-center text-[10px] font-black uppercase tracking-widest hover:bg-mint-dark transition-colors"
-                                        >
-                                            Apply Now
-                                        </a>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
                     {threads.length > 0 && (
-                        <div className="w-full mt-24 border-t border-neutral-200 pt-16">
-                            <div className="flex flex-col items-center mb-12">
-                                <span className="px-3 py-1 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                                    Community Intelligence
+                        <div className="w-full mt-24 border-t border-neutral-100 pt-16">
+                            <div className="flex flex-col items-center text-center mb-12">
+                                <span className="px-2.5 py-1 bg-neutral-950 text-white rounded-md text-[9px] font-black uppercase tracking-[0.2em] mb-3">
+                                    Collective Archive Intelligence
                                 </span>
-                                <h2 className="text-4xl font-black text-center text-black uppercase tracking-tight">
-                                    Peer Discussions
+                                <h2 className="text-3xl font-black text-neutral-950 uppercase tracking-tighter sm:text-4xl">
+                                    Peer-to-Peer Discussions
                                 </h2>
-                                <p className="text-neutral-400 text-sm mt-2 font-medium">
-                                    Relevant threads from the collective archive
+                                <p className="text-neutral-400 text-xs sm:text-sm mt-1.5 font-semibold uppercase tracking-wider max-w-md">
+                                    Live analytical discussions parsed from our active local forum index
                                 </p>
                             </div>
-
-                            <div className="max-w-4xl mx-auto space-y-4">
-                                {threads.map((thread) => (
-                                    <div 
-                                        key={thread.id}
-                                        onClick={() => startTransition(`/forum/${thread.id}`)}
-                                        className="magnetic group p-6 bg-white border border-neutral-100 rounded-3xl hover:border-black transition-colors cursor-pointer flex justify-between items-center"
-                                    >
-                                        <div className="space-y-3">
-                                            <div className="flex gap-2">
-                                                {thread.tags?.slice(0, 2).map((tag: string) => (
-                                                    <span key={tag} className="text-[8px] font-black text-mint-dark uppercase tracking-widest">#{tag}</span>
-                                                ))}
-                                            </div>
-                                            <h4 className="text-lg font-bold group-hover:text-mint-dark transition-colors uppercase leading-tight">
-                                                {thread.title}
-                                            </h4>
-                                            <div className="flex items-center gap-3 text-[9px] font-black text-neutral-400 uppercase tracking-tighter">
-                                                <span>{thread.authorName}</span>
-                                                <span className="size-1 bg-neutral-200 rounded-full" />
-                                                <span>{thread.replies || 0} Discussions</span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right pl-6 border-l border-neutral-50">
-                                            <span className="text-xl font-black text-neutral-200 group-hover:text-black transition-colors">
-                                                {thread.karma ? `${Math.sign(thread.karma) === -1 ? "-" : "+"} ${Math.abs(thread.karma)}` : 0}
-                                            </span>
-                                        </div>
-                                    </div>
+                            <div className="max-w-4xl mx-auto space-y-3.5">
+                                {threads.map((thread: any) => (
+                                    <ThreadItem key={thread.id} thread={thread} />
                                 ))}
                             </div>
                         </div>
                     )}
-                    <p className="mt-8 text-[9px] text-neutral-400 uppercase font-bold tracking-widest text-center max-w-lg">
-                        Results are generated via hybrid-vector search. Accuracy depends on provided query and quality vector data on our end. Cross-verify with official school registrars.
-                    </p>
+                    <div className="w-full flex justify-center mt-20 border-t border-neutral-50 pt-8">
+                        <p className="text-[9px] text-neutral-400 uppercase font-bold tracking-widest text-center max-w-xl leading-relaxed">
+                            Results generated via semantic hybrid-vector query strings. Parameter alignments depend entirely on localized database indexes. Cross-verify registration deadlines and tuition matrix updates with official institutional registrars.
+                        </p>
+                    </div>
                 </div>
-            </section>
+                </>
+            )}
         </div>
     );
 }

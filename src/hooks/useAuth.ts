@@ -12,7 +12,7 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType>({
     user: null,
-    loading: true,
+    loading: false,
     firebaseUser: null,
 });
 

@@ -21,7 +21,7 @@ import { useAuth } from "@/src/hooks/useAuth";
 import { useTransition } from "@/src/hooks/useTransition";
 import Image from "next/image";
 import { usePosts } from "@/src/hooks/usePosts";
-import gsap from "@/src/modules/gsap"; // Imported GSAP Engine
+import gsap from "@/src/modules/gsap";
 
 export default function ForumPage() {
     const { user } = useAuth();
@@ -165,7 +165,10 @@ export default function ForumPage() {
                         <div
                             ref={scrollContainerRef}
                             onScroll={handleScroll}
+                            data-speed="1"
+                            data-lag="0"
                             className="flex p-1.5 overflow-x-auto no-scrollbar max-w-full sm:w-auto self-start lg:self-end"
+                            style={{ touchAction: "pan-x" }} 
                         >
                             {[
                                 { id: "latest", label: "Latest", icon: Clock },
@@ -218,7 +221,6 @@ export default function ForumPage() {
                             sortedPosts.map((post) => {
                                 const getKarmaSpecs = (karma: number) => {
                                     if (!karma || karma === 0) return { Icon: ArrowLeftRight, colorClass: "group-hover:text-neutral-900" };
-                                    // Make sure ArrowDownRight is imported from 'lucide-react' at the top of your file!
                                     if (karma < 0) return { Icon: ArrowDownRight, colorClass: "group-hover:text-red-500" };
                                     return { Icon: ArrowUpRight, colorClass: "group-hover:text-mint-dark" };
                                 };
@@ -274,7 +276,7 @@ export default function ForumPage() {
                             })
                         )}
                     </div>
-                    <div className="lg:col-span-4 order-1 lg:order-2 w-full min-h-full relative">
+                    <div className="relative lg:col-span-4 order-1 lg:order-2 w-full min-h-full ">
                         <div 
                             ref={sidebarRef} 
                             className="space-y-6 transition-shadow duration-200 lg:absolute lg:w-full lg:top-0"
@@ -316,12 +318,21 @@ export default function ForumPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => startTransition("/forum/create")} 
-                                        className="magnetic cursor-pointer w-full py-4 bg-neutral-900 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-mint-dark transition-colors duration-300 shadow-md shadow-neutral-950/5"
-                                    >
-                                        Start a Discussion
-                                    </button>
+                                    {user.privileges?.includes("forum:create") ? (
+                                        <button 
+                                            onClick={() => startTransition("/forum/create")} 
+                                            className="magnetic cursor-pointer w-full py-4 bg-neutral-900 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-mint-dark transition-colors duration-300 shadow-md shadow-neutral-950/5"
+                                        >
+                                            Start a Discussion
+                                        </button>
+                                    ) : (
+                                        <div className="w-full py-3.5 px-4 bg-neutral-50 rounded-xl border border-neutral-200/60 flex items-center gap-3 select-none">
+                                            <Lock size={14} className="text-neutral-400 shrink-0" />
+                                            <span className="text-[9px] font-black uppercase tracking-wider text-neutral-400 leading-none">
+                                                Creation Track Suspended
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             <div className="p-6 md:p-8 bg-white border border-neutral-200/80 rounded-4xl space-y-5 shadow-sm">
@@ -342,7 +353,6 @@ export default function ForumPage() {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

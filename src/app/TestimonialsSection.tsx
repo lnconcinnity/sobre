@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import gsap from "gsap";
-import { useGSAP } from "../../modules/gsap";
+import { useGSAP } from "../modules/gsap";
 import Image from "next/image";
 import { Quote, Sparkles, Star } from "lucide-react";
 

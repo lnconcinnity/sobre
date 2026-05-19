@@ -22,7 +22,7 @@ export default function FloatingInput({
     children 
 }: FloatingInputProps) {
     return (
-        <div className="locked magnetic relative mt-6 group w-full max-w-md rounded-full">
+        <div className="sm:locked magnetic relative mt-6 group w-full max-w-md rounded-full">
             <div className="relative overflow-hidden border-b border-black/10 transition-colors duration-500 focus-within:border-mint-dark">
                 <input 
                     type="text"

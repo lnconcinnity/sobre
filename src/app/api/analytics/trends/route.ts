@@ -37,11 +37,14 @@ export async function GET() {
                 .slice(0, 5);
 
             if (sorted.length > 0) {
-                return Response.json(sorted.map(item => ({
-                    id: item.query,
-                    label: slugToTitleCase(item.query),
-                    query: item.query
-                })));
+                return Response.json(sorted.map(item => {
+                    const title = slugToTitleCase(item.query);
+                    return {
+                        id: item.query,
+                        label: title,
+                        query: title
+                    }
+                }));
             }
         }
         

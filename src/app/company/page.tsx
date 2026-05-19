@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useGSAP } from "../../modules/gsap";
+import { useGSAP } from "@/src/modules/gsap";
 import gsap from "gsap";
 import Image from "next/image";
 import { Building2, Eye, Target, ArrowUpRight } from "lucide-react";
@@ -88,8 +88,15 @@ export default function CompanyPage() {
 	const setHeroVisible = useNavStore((state) => state.setHeroVisible);
 	const container = useRef<HTMLDivElement>(null);
 	const [headerContainer, inView] = useInView({ threshold: 0.4 });
+
 	useGSAP(() => {
 		if (!container.current) return;
+		const isMobile = window.innerWidth < 768;
+		
+		const textStart = isMobile ? "top 95%" : "top 85%";
+		const panelStart = isMobile ? "top 96%" : "top 88%";
+		const rosterStart = isMobile ? "top 96%" : "top 90%";
+
 		gsap.fromTo(".reveal-text", 
 			{ 
 				y: 25, 
@@ -103,11 +110,12 @@ export default function CompanyPage() {
 				ease: "power3.out",
 				scrollTrigger: {
 					trigger: container.current,
-					start: "top 85%",
+					start: textStart,
 					toggleActions: "play none none none"
 				}
 			}
 		);
+
 		const glassPanels = gsap.utils.toArray<HTMLElement>(".glass-panel-fade");
 		glassPanels.forEach((panel) => {
 			gsap.fromTo(panel,
@@ -128,9 +136,9 @@ export default function CompanyPage() {
 					ease: "power2.out",
 					scrollTrigger: {
 						trigger: panel,
-						start: "top 88%",
+						start: panelStart,
 						end: "bottom 12%",
-						toggleActions: "play reverse play reverse",
+						toggleActions: isMobile ? "play none none none" : "play reverse play reverse",
 					}
 				}
 			);
@@ -141,22 +149,22 @@ export default function CompanyPage() {
 			gsap.fromTo(item,
 				{
 					opacity: 0,
-					scale: 0.94,
+					scale: 0.96,
 					filter: "blur(4px) grayscale(100%)",
-					y: 30
+					y: 24
 				},
 				{
 					opacity: 1,
 					scale: 1,
 					filter: "blur(0px) grayscale(0%)",
 					y: 0,
-					duration: 0.9,
-					ease: "power4.out",
+					duration: 0.8,
+					ease: "power3.out",
 					scrollTrigger: {
 						trigger: item,
-						start: "top 90%",
+						start: rosterStart,
 						end: "bottom 10%",
-						toggleActions: "play reverse play reverse",
+						toggleActions: isMobile ? "play none none none" : "play reverse play reverse",
 					}
 				}
 			);

@@ -7,31 +7,34 @@ import { useAuth } from "@/src/hooks/useAuth";
 import { ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTransition } from "@/src/hooks/useTransition";
+import { useSearchParams } from "next/navigation";
 
 export default function AuthPage() {
     const { user, loading: authLoading } = useAuth();
     const { startTransition } = useTransition();
+    const params = useSearchParams();
     const [localProcessing, setLocalProcessing] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
+    const redirectPath = params.get("redirect");
 
     useEffect(() => {
         getRedirectResult(auth)
             .then((result) => {
                 if (result?.user) {
-                    startTransition("/forum");
+                    startTransition(redirectPath as string | undefined);
                 }
             })
             .catch((error) => {
                 console.error("Redirect Resolution Failure:", error);
                 setAuthError("Failed to resolve authentication redirect.");
             });
-    }, [startTransition]);
+    }, [startTransition, redirectPath]);
 
     useEffect(() => {
         if (!authLoading && user) {
-            startTransition("/forum");
+            startTransition(redirectPath as string | undefined);
         }
-    }, [user, authLoading, startTransition]);
+    }, [user, authLoading, startTransition, redirectPath]);
 
     const handleGoogleLogin = async () => {
         setLocalProcessing(true);
@@ -81,7 +84,7 @@ export default function AuthPage() {
                 </div>
                 
                 <button 
-                    onClick={() => startTransition("/forum")}
+                    onClick={() => startTransition(redirectPath as string | undefined)}
                     className="magnetic rounded-full max-w-40 cursor-pointer relative z-10 flex items-center gap-2 text-mint-light/50 hover:text-mint-light transition-colors text-[10px] font-black uppercase tracking-widest"
                 >
                     <ArrowLeft size={14} /> Back to browsing
@@ -108,7 +111,7 @@ export default function AuthPage() {
             </div>
             <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-24 relative">
                 <button 
-                    onClick={() => startTransition("/forum")}
+                    onClick={() => startTransition()}
                     className="md:hidden absolute top-8 left-8 flex items-center gap-2 text-neutral-400 font-bold uppercase text-[9px] tracking-widest"
                 >
                     <ArrowLeft size={12} /> Exit Track
