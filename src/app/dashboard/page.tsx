@@ -15,13 +15,15 @@ import { collection, query, where, onSnapshot, getDocs } from "firebase/firestor
 import { db } from "@/src/modules/firebase";
 import ThreadItem from "@/src/components/ThreadItem";
 import SavedUniversityItem from "./SavedUniversityItem";
+import ProfileEditModal from "./ProfileEditModal";
 
 export default function DashboardPage() {
     const { user } = useAuth();
     const { startTransition } = useTransition();
     const [threads, setThreads] = useState<any[]>([]);
     const [savedUniData, setSavedUniData] = useState<any[]>([]);
-    
+    const [isEditing, setIsEditing] = useState(false);
+
     useEffect(() => {
         if (!user) return;
         
@@ -85,8 +87,15 @@ export default function DashboardPage() {
                         <div className="lg:col-span-1 space-y-6">
                             <div className="bg-white p-8 rounded-3xl border border-black/5 shadow-xs">
                                 <div className="relative size-20 bg-neutral-900 rounded-full mb-6 overflow-hidden">
-                                    <Image src={user.photoURL} alt={user.displayName} fill className="object-cover object-center" />
+                                    <Image src={user.photoURL} alt={user.displayName} fill />
+                                    <button 
+                                        onClick={() => setIsEditing(true)}
+                                        className="locked cursor-pointer magnetic rounded-full absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center"
+                                    >
+                                        <Settings className="text-white" />
+                                    </button>
                                 </div>
+
                                 <h2 className="text-xl font-black uppercase tracking-tight">{user.displayName}</h2>
                                 <p className="text-xs text-neutral-500 mt-2 leading-relaxed">{user.metadata.biography || "No biography provided."}</p>
                                 
@@ -119,6 +128,7 @@ export default function DashboardPage() {
                             </DashboardCard>
                         </div>
                     </section>
+
                     {threads.length > 0 ? (
                         <section className="w-full mt-8 border-t border-neutral-100">
                             <div className="flex flex-col items-center text-center mb-12">
@@ -143,13 +153,19 @@ export default function DashboardPage() {
                             <p className="text-neutral-400 text-xs font-bold uppercase tracking-widest">No active contributions recorded.</p>
                             <button 
                                 onClick={() => startTransition("/forum/create")} 
-                                className="mt-4 text-[9px] font-black uppercase text-mint-dark underline"
+                                className="magnetic pointer-cursor mt-4 text-[9px] font-black uppercase text-mint-dark underline"
                             >
                                 Start your first thread
                             </button>
                         </section>
                     )}
                 </div>
+                {isEditing && (
+                    <ProfileEditModal 
+                        currentData={user} 
+                        onClose={() => setIsEditing(false)} 
+                    />
+                )}
             </main>
         </PrivilegeGuard>
     );

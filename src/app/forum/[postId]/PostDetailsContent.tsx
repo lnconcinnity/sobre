@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { doc, getDoc, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, increment, runTransaction, updateDoc } from "firebase/firestore";
 import { db } from "@/src/modules/firebase";
 import { useAuth } from "@/src/hooks/useAuth";
-import { ArrowLeft, Send, Globe, Layers, Flag, Trash2, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Send, Globe, Layers, Flag, Trash2, MoreHorizontal, User } from "lucide-react";
 import { useTransition } from "@/src/hooks/useTransition";
 import gsap, { useGSAP } from "@/src/modules/gsap";
 
@@ -16,6 +16,7 @@ import ReportModal from "./ReportModal";
 import ImageGallery from "./ImageGallery";
 import ImageDisplay from "./ImageDisplay";
 import { useToast } from "@/src/hooks/useToast";
+import Image from "next/image";
 
 export default function PostDetailsContent({ isRedirected }: { isRedirected: boolean }) {
     const { postId } = useParams();
@@ -30,6 +31,7 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
     const [reportTarget, setReportTarget] = useState<{ type: "post" | "comment"; id: string } | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { warning, success, confirm } = useToast();
+    const [isVoting, setIsVoting] = useState(false);
 
     const gridRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -123,7 +125,8 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
     };
 
     const handlePostVote = async (targetValue: number) => {
-        if (!checkAuthOrRedirect(user)) return;
+        if (isVoting || !checkAuthOrRedirect(user)) return;
+        setIsVoting(true);
 
         const postRef = doc(db, "posts", postId as string);
         const voteRef = doc(db, "posts", postId as string, "votes", user!.uid);
@@ -142,6 +145,8 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
             setUserVote(targetValue);
         } catch (e) {
             console.error("Vote transaction failed:", e);
+        } finally {
+            setIsVoting(false);
         }
     };
 
@@ -166,7 +171,6 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
 
     const handleDeletePost = async () => {
         if (!await confirm("Are you sure you want to delete this thread? This action cannot be undone.")) return;
-
         try {
             if (post.attachments?.length > 0) {
                 await fetch("/api/user/remove-attachment", { method: "POST", body: JSON.stringify({ urls: post.attachments }) });
@@ -180,9 +184,11 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
                     title: "[Deleted]",
                     content: "[This thread has been archived and removed by the author.]",
                     attachments: [],
+                    authorName: "Deleted User",
+                    authorPhoto: null,
                     isDeleted: true
                 });
-                setPost((p: any) => ({ ...p, title: "[Deleted]", content: "[...]" }));
+                setPost((p: any) => ({ ...p, title: "[Deleted]", content: "[...]", attachments: [], authorName: "Deleted User", authorPhoto: null }));
                 warning("Thread tombstoned.");
             } else {
                 await runTransaction(db, async (transaction) => {
@@ -232,6 +238,13 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
                             <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <VoteSideview handleVote={handlePostVote} karma={post.karma} userVote={userVote} />
+                                    <div className="size-8 rounded-full overflow-hidden bg-neutral-200 relative">
+                                        {post.authorPhoto ? (
+                                            <Image src={post.authorPhoto} alt="" fill className="object-cover" />
+                                        ) : (
+                                            <User size={12} className="text-neutral-400 size-full" />
+                                        )}
+                                    </div>
                                     <span className="text-[10px] font-bold text-neutral-600 uppercase tracking-wider">{post.authorName}</span>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -252,14 +265,12 @@ export default function PostDetailsContent({ isRedirected }: { isRedirected: boo
                                                         <Trash2 size={12} /> Delete Post
                                                     </button>
                                                 )}
-                                                {user && (
-                                                    <button 
-                                                        onClick={() => setReportTarget({ type: "post", id: postId as string })}
-                                                        className="magnetic text-[10px] font-black uppercase tracking-widest text-neutral-700 p-2 cursor-pointer  rounded-lg flex items-center gap-2"
-                                                    >
-                                                        <Flag size={12} /> Flag Post
-                                                    </button>
-                                                )}
+                                                <button 
+                                                    onClick={() => setReportTarget({ type: "post", id: postId as string })}
+                                                    className="magnetic text-[10px] font-black uppercase tracking-widest text-neutral-700 p-2 cursor-pointer  rounded-lg flex items-center gap-2"
+                                                >
+                                                    <Flag size={12} /> Flag Post
+                                                </button>
                                             </div>
                                         )}
                                     </div>

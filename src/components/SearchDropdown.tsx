@@ -202,42 +202,44 @@ export default function SearchDropdown({
                     {isLoading && <span className="text-[9px] lowercase text-mint-dark animate-pulse">Running Semantic Search...</span>}
                 </div>
 
-                <div className="flex flex-col gap-1">
-                    {activeSuggestions.length > 0 ? (
-                        activeSuggestions.map((suggestion, idx) => (
-                            <DropdownItem 
-                                key={suggestion.id || idx}
-                                icon={suggestion.icon || "🎓"} 
-                                label={suggestion.label} 
-                                category={suggestion.category || "Trending"} 
-                                isFocused={focusedIndex === idx}
-                                onClick={() => triggerSearch(suggestion.query)}
-                            />
-                        ))
-                    ) : (
-                        <div className="p-3 text-[10px] text-neutral-400 italic select-none">
-                            {isLoading ? "Querying vector space..." : "No close matches found..."}
-                        </div>
-                    )}
-
-                    {hasInput && (
-                        <div className="mt-1 pt-1 border-t border-neutral-100">
-                            <div 
-                                onClick={() => triggerSearch(inputValue)}
-                                className={`flex items-center justify-between p-3 text-xs cursor-pointer rounded-lg font-bold transition-colors ${
-                                    focusedIndex === activeSuggestions.length 
-                                        ? "bg-mint-dark text-white!" 
-                                        : "text-mint-dark hover:bg-mint-light/5 italic"
-                                }`}
-                            >
-                                <span>See deep metrics for &quot;{inputValue}&quot;</span>
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                { variant !== "lean" && ( 
+                    <div className="flex flex-col gap-1">
+                        {activeSuggestions.length > 0 ? (
+                            activeSuggestions.map((suggestion, idx) => (
+                                <DropdownItem 
+                                    key={suggestion.id || idx}
+                                    icon={suggestion.icon || "🎓"} 
+                                    label={suggestion.label} 
+                                    category={suggestion.category || "Trending"} 
+                                    isFocused={focusedIndex === idx}
+                                    onClick={() => triggerSearch(suggestion.query)}
+                                />
+                            ))
+                        ) : (
+                            <div className="p-3 text-[10px] text-neutral-400 italic select-none">
+                                {isLoading ? "Querying vector space..." : "No close matches found..."}
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+
+                        {hasInput && (
+                            <div className="mt-1 pt-1 border-t border-neutral-100">
+                                <div 
+                                    onClick={() => triggerSearch(inputValue)}
+                                    className={`flex items-center justify-between p-3 text-xs cursor-pointer rounded-lg font-bold transition-colors ${
+                                        focusedIndex === activeSuggestions.length 
+                                            ? "bg-mint-dark text-white!" 
+                                            : "text-mint-dark hover:bg-mint-light/5 italic"
+                                    }`}
+                                >
+                                    <span>See deep metrics for &quot;{inputValue}&quot;</span>
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -33,8 +33,8 @@ export const SingleUniversityView = ({
 }: SingleUniversityViewProps) => {
     const { user } = useAuth();
     const { toggleFavorite } = useFavorite();
-    const mainRef = useRef<HTMLDivElement>(null);
     const isSaved = user?.savedUniversities?.includes(item.name);
+    const mainRef = useRef<HTMLDivElement>(null);
     useGSAP(() => {
         if (!mainRef.current) return;
         const smoother = ScrollSmoother.get();

@@ -20,8 +20,10 @@ import { MultipleUniversitiesView } from "./MultipleUniversitiesView";
 import { ProgramsPaginationView } from "./ProgramsPaginationView";
 import { ScholarshipsView } from "./ScholarshipsView";
 import ThreadItem from "@/src/components/ThreadItem";
+import { useAuth } from "@/src/hooks/useAuth";
 
 export default function SearchContent({ query }: { query: string | null }) {
+    const { user } = useAuth();
     const { startTransition } = useTransition();
     const setHeroVisible = useNavStore((state) => state.setHeroVisible);
     const [resultsContainer, inView] = useInView({ threshold: 0.7 });
@@ -49,6 +51,20 @@ export default function SearchContent({ query }: { query: string | null }) {
 
     useEffect(() => {
         if (!query) return;
+        const cacheKey = `search_cache_${query}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+
+        if (cachedData) {
+            const { results, scholarships, threads, narratives, intent } = JSON.parse(cachedData);
+            setResults(results);
+            setScholarships(scholarships);
+            setThreads(threads);
+            setNarratives(narratives);
+            setIntent(intent);
+            setStatus("completed");
+            return;
+        }
+        
         const controller = new AbortController();
         const runPipeline = async () => {
             try {
@@ -95,7 +111,11 @@ export default function SearchContent({ query }: { query: string | null }) {
                             query, 
                             leanResults,
                             intent: detectedIntent,
-                            slugCandidates
+                            slugCandidates,
+                            blob: user ? {
+                                location: user.metadata?.location || null,
+                                biography: user.metadata?.biography || null,
+                            } : null,
                         }),
                         signal: controller.signal
                     });
@@ -132,8 +152,9 @@ export default function SearchContent({ query }: { query: string | null }) {
                             };
                         }
                     });
-
                     setNarratives(reconciledNarratives);
+                    const cachePayload = { results: originalResults, scholarships, threads, narratives, intent: detectedIntent };
+                    sessionStorage.setItem(cacheKey, JSON.stringify(cachePayload));
                     setStatus("completed");
                 } else {
                     setStatus("ignored");
@@ -147,7 +168,7 @@ export default function SearchContent({ query }: { query: string | null }) {
 
         runPipeline();
         return () => controller.abort();
-    }, [query]);
+    }, [query, user]);
 
     useEffect(() => {
         if (status !== "searching" && status !== "reasoning") return;

@@ -2,9 +2,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Clock, ChevronRight, ChevronLeft, Award } from "lucide-react";
+import { BookOpen, Clock, ChevronRight, ChevronLeft, Award, Star } from "lucide-react";
 import gsap from "gsap";
 import { UniversityCarousel } from "./UniversityCarousel";
+import { useFavorite } from "@/src/hooks/useFavorite";
+import { useAuth } from "@/src/hooks/useAuth";
 
 interface ProgramsPaginationViewProps {
     results: any[];
@@ -12,13 +14,16 @@ interface ProgramsPaginationViewProps {
 }
 
 export function ProgramsPaginationView({ results, narratives }: ProgramsPaginationViewProps) {
+    const { user } = useAuth();
     const [activeIndex, setActiveIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     
     const containerRef = useRef<HTMLDivElement>(null);
     const progressTimelineRef = useRef<gsap.core.Timeline | null>(null);
     const progressBarRefs = useRef<HTMLDivElement[]>([]);
-
+    const { toggleFavorite } = useFavorite();
+    const [isOptimisticSaved, setIsOptimisticSaved] = useState<boolean | null>(null);
+    
     const AUTOPLAY_DURATION = 8;
     const currentProgram = results[activeIndex];
     const currentNarrative = narratives?.[currentProgram?.slug || currentProgram?.id] || {};
@@ -27,6 +32,23 @@ export function ProgramsPaginationView({ results, narratives }: ProgramsPaginati
         if (el) progressBarRefs.current[index] = el;
     };
 
+    const handleToggleFavorite = async () => {
+        const previousState = isOptimisticSaved;
+        setIsOptimisticSaved(!previousState);
+
+        try {
+            await toggleFavorite("targetPrograms", currentProgram.name);
+        } catch (error) {
+            setIsOptimisticSaved(previousState);
+            console.error("Failed to toggle favorite", error);
+        }
+    };
+    
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsOptimisticSaved(user?.metadata.targetPrograms?.includes(currentProgram.name) ?? false);
+    }, [user, currentProgram.name]);
+    
     useEffect(() => {
         if (results.length <= 1) return;
 
@@ -176,6 +198,22 @@ export function ProgramsPaginationView({ results, narratives }: ProgramsPaginati
                             </div>
                         </div>
                     )}
+                    <button 
+                        onClick={handleToggleFavorite}
+                        className={`magnetic py-2 px-4 flex items-center gap-2 rounded-xl transition-colors duration-300 border ${
+                            isOptimisticSaved 
+                                ? "bg-yellow-50 text-yellow-600 border-yellow-200" 
+                                : "bg-white text-neutral-900 border-neutral-200 hover:border-neutral-400 hover:shadow-sm"
+                        }`}
+                    >
+                        <Star 
+                            size={16} 
+                            fill={isOptimisticSaved ? "currentColor" : "none"} 
+                        />
+                        <span className="text-xs font-bold">
+                            {isOptimisticSaved ? "Remove Program" : "Save Program"}
+                        </span>
+                    </button>
                 </div>
                 <div className="lg:col-span-7 w-full program-fade-target bg-neutral-50/40 border border-neutral-200/60 p-4 rounded-3xl">
                     <UniversityCarousel 

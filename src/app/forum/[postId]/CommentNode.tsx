@@ -22,6 +22,7 @@ export default function CommentNode({ comment, allComments, onReply, user, postI
     const children = allComments.filter((c: any) => c.parentId === comment.id);
     const currentUserVote = allVotes[comment.id] || 0;
     const isDepthLimitReached = comment.depth >= MAX_DEPTH;
+    const [isVoting, setIsVoting] = useState(false);
 
     useGSAP(() => {
         if (isReplying) {
@@ -50,8 +51,9 @@ export default function CommentNode({ comment, allComments, onReply, user, postI
     }, { dependencies: [isMenuOpen] });
 
     const handleCommentVote = async (targetValue: number) => {
-        if (!user) return;
-        
+        if (!user || isVoting) return;
+        setIsVoting(true);
+
         const voteRef = doc(db, "posts", postId, "userCommentVotes", user.uid, "votes", comment.id);
         const commentRef = doc(db, "posts", postId, "comments", comment.id);
         const authorRef = doc(db, "users", comment.authorId);
@@ -70,6 +72,8 @@ export default function CommentNode({ comment, allComments, onReply, user, postI
             });
         } catch (e) {
             console.error("Comment vote transaction failed:", e);
+        } finally {
+            setIsVoting(false);
         }
     };
 
@@ -174,14 +178,12 @@ export default function CommentNode({ comment, allComments, onReply, user, postI
                                             <Trash2 size={12} /> Delete
                                         </button>
                                     )}
-                                    {user && (
-                                        <button 
-                                            onClick={() => { openReportModal("comment", comment.id); setIsMenuOpen(false); }}
-                                            className="magnetic text-[10px] font-black uppercase tracking-widest text-neutral-700 p-2 cursor-pointer  rounded-lg flex items-center gap-2"
-                                        >
-                                            <Flag size={12} /> Flag
-                                        </button>
-                                    )}
+                                    <button 
+                                        onClick={() => { openReportModal("comment", comment.id); setIsMenuOpen(false); }}
+                                        className="magnetic text-[10px] font-black uppercase tracking-widest text-neutral-700 p-2 cursor-pointer  rounded-lg flex items-center gap-2"
+                                    >
+                                        <Flag size={12} /> Flag
+                                    </button>
                                 </div>
                             )}
                         </div>

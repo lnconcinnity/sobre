@@ -194,18 +194,24 @@ export const pushUniversities = async () => {
     }
 
     console.log("Seeding Universities and Programs...");
+    const programStateMap = new Map<string, any>();
+
     for (const item of universitySeedData) {
         const { university, programs } = item;
         if (university.heroImage) university.heroImage = await cacheImage(university.heroImage, `sobre/universities`, university.slug);
 
         const allProgramSlugs = new Set<string>();
         const programKeywordsForVector: string[] = [];
+        
         const collegeSummaries = programs.reduce((acc: any, prog: any) => {
             const collegeName = prog.collegeData.college_name;
             const { progSlug, majorSlug, baseTitle } = getProgramSlug(prog.title);
             allProgramSlugs.add(progSlug);
             programKeywordsForVector.push(baseTitle, ...(majorSlug ? [majorSlug] : []), ...prog.tags);
-            if (!acc[collegeName]) acc[collegeName] = { name: collegeName, acronym: prog.collegeData.acronym, tuition_range: prog.collegeData.tuition_range, programs: new Set() };
+            
+            if (!acc[collegeName]) {
+                acc[collegeName] = { name: collegeName, acronym: prog.collegeData.acronym, tuition_range: prog.collegeData.tuition_range, programs: new Set() };
+            }
             acc[collegeName].programs.add(progSlug + (majorSlug ? `-${majorSlug}` : ""));
             return acc;
         }, {});
@@ -216,34 +222,66 @@ export const pushUniversities = async () => {
         const uniVectorValues = await getVector(uniVectorInput);
 
         const uniRef = db.collection("universities").doc(university.slug);
-        batch.set(uniRef, { ...university, aliases: inferredAliases, colleges: finalColleges, programSlugs: Array.from(allProgramSlugs), embedding: firestore.FieldValue.vector(uniVectorValues) });
-        if (++opCount >= 400) { await batch.commit(); opCount = 0; }
+        batch.set(uniRef, { 
+            ...university, 
+            aliases: inferredAliases, 
+            colleges: finalColleges, 
+            programSlugs: Array.from(allProgramSlugs), 
+            embedding: firestore.FieldValue.vector(uniVectorValues) 
+        });
 
         for (const prog of programs) {
             const { progSlug, baseTitle, majorSlug } = getProgramSlug(prog.title);
-            const progRef = db.collection("programs").doc(progSlug);
-            const progSnap = await progRef.get();
-            const newSchoolEntry = { universitySlug: university.slug, universityName: university.name, ...prog.collegeData, tags: prog.tags, offered_majors: majorSlug ? [majorSlug] : [], heroImage: university.heroImage };
             
-            if (progSnap.exists) {
-                const data = progSnap.data()!;
-                const schools = data.schools || [];
-                const idx = schools.findIndex((s: any) => s.universitySlug === university.slug);
-                if (idx > -1) {
-                    if (majorSlug && !schools[idx].offered_majors.includes(majorSlug)) schools[idx].offered_majors.push(majorSlug);
-                    schools[idx].tags = Array.from(new Set([...(schools[idx].tags || []), ...prog.tags]));
-                } else {
-                    schools.push(newSchoolEntry);
-                }
-                const tags = Array.from(new Set(schools.flatMap((s: any) => s.tags)));
-                const vec = await getVector(`degree: ${baseTitle}. fields: ${tags.join(", ")}. tracks: ${getStrandAffinities(progSlug, baseTitle, tags as string[]).join(", ")}`);
-                batch.update(progRef, { schools, strandAffinities: Array.from(new Set([...(data.strandAffinities || []), ...getStrandAffinities(progSlug, baseTitle, prog.tags)])), embedding: firestore.FieldValue.vector(vec) });
-            } else {
-                const vec = await getVector(`degree: ${baseTitle}. fields: ${prog.tags.join(", ")}. tracks: ${getStrandAffinities(progSlug, baseTitle, prog.tags).join(", ")}`);
-                batch.set(progRef, { slug: progSlug, name: baseTitle, schools: [newSchoolEntry], strandAffinities: getStrandAffinities(progSlug, baseTitle, prog.tags), embedding: firestore.FieldValue.vector(vec) });
+            if (!programStateMap.has(progSlug)) {
+                programStateMap.set(progSlug, { 
+                    slug: progSlug, 
+                    name: baseTitle, 
+                    schools: [], 
+                    strandAffinities: new Set() 
+                });
             }
-            if (++opCount >= 400) { await batch.commit(); opCount = 0; }
+
+            const data = programStateMap.get(progSlug);
+            const newSchoolEntry = { 
+                universitySlug: university.slug, 
+                universityName: university.name, 
+                ...prog.collegeData, 
+                tags: prog.tags, 
+                offered_majors: majorSlug ? [majorSlug] : [], 
+                heroImage: university.heroImage 
+            };
+            
+            const schoolIdx = data.schools.findIndex((s: any) => s.universitySlug === university.slug);
+            if (schoolIdx > -1) {
+                if (majorSlug && !data.schools[schoolIdx].offered_majors.includes(majorSlug)) {
+                    data.schools[schoolIdx].offered_majors.push(majorSlug);
+                }
+                data.schools[schoolIdx].tags = Array.from(new Set([...data.schools[schoolIdx].tags, ...prog.tags]));
+            } else {
+                data.schools.push(newSchoolEntry);
+            }
+            
+            prog.tags.forEach((t: string) => data.strandAffinities.add(t));
+            const affinities = getStrandAffinities(progSlug, baseTitle, Array.from(data.strandAffinities));
+            affinities.forEach(a => data.strandAffinities.add(a));
         }
+        if (++opCount >= 400) { await batch.commit(); opCount = 0; }
+    }
+
+    console.log("Committing aggregated programs...");
+    for (const [slug, data] of programStateMap) {
+        const tags = Array.from(new Set(data.schools.flatMap((s: any) => s.tags)));
+        const vec = await getVector(`degree: ${data.name}. fields: ${tags.join(", ")}. tracks: ${Array.from(data.strandAffinities).join(", ")}`);
+        
+        const progRef = db.collection("programs").doc(slug);
+        batch.set(progRef, { 
+            ...data, 
+            strandAffinities: Array.from(data.strandAffinities), 
+            embedding: firestore.FieldValue.vector(vec) 
+        });
+        
+        if (++opCount >= 400) { await batch.commit(); opCount = 0; }
     }
     await batch.commit();
     console.log("Seeding complete.");

@@ -26,7 +26,8 @@ export function UniversityCarousel({ providers, narrativeAnalysis }: UniversityC
     const [currentIndex, setCurrentIndex] = useState(0);
     const trackRef = useRef<HTMLDivElement>(null);
     const activeProviders = providers || [];
-
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentIndex(0);
@@ -48,6 +49,18 @@ export function UniversityCarousel({ providers, narrativeAnalysis }: UniversityC
             });
         }
     };
+    const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchStart === null) return;
+        const touchEnd = e.changedTouches[0].clientX;
+        const diff = touchStart - touchEnd;
+        
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) handleSlide(Math.min(currentIndex + 1, activeProviders.length - 1));
+            else handleSlide(Math.max(currentIndex - 1, 0));
+        }
+        setTouchStart(null);
+    };
 
     if (activeProviders.length === 0) {
         return (
@@ -62,7 +75,11 @@ export function UniversityCarousel({ providers, narrativeAnalysis }: UniversityC
     }
 
     return (
-        <div className="w-full flex flex-col justify-between h-full relative">
+        <div 
+            className="w-full flex flex-col justify-between h-full relative"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
             <div className="w-full overflow-hidden rounded-2xl relative">
                 <div 
                     ref={trackRef}
@@ -70,22 +87,20 @@ export function UniversityCarousel({ providers, narrativeAnalysis }: UniversityC
                     style={{ display: "flex" }}
                 >
                     {activeProviders.map((uni, idx) => {
-                        const lookupSlug = uni.universitySlug;
-                        const specificSchoolAnalysis = typeof narrativeAnalysis === "object" && lookupSlug
-                            ? narrativeAnalysis[lookupSlug] 
-                            : null;
-
+                        const programData = narrativeAnalysis; 
+                        const analysisArray = Array.isArray(programData) ? programData : [];
+                        const specificSchoolAnalysis = analysisArray.find(
+                            (item: any) => item.uni_slug === uni.universitySlug
+                        )?.analysis || null;
                         const estimatedTuition = uni.tuition_range?.min ?? uni.tuition;
                         const toTitleCase = (str: string) => 
                             str.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
-
                         const structuralMajors = Array.isArray(uni.offered_majors) 
                             ? uni.offered_majors.map((major: string) => toTitleCase(major)).join(", ") 
                             : toTitleCase(uni.majors || "General Path");
-
                         return (
                             <div 
-                                key={lookupSlug || idx} 
+                                key={uni.universitySlug || idx} 
                                 className="w-full shrink-0 px-1"
                                 style={{ width: "100%" }}
                             >
@@ -155,7 +170,7 @@ export function UniversityCarousel({ providers, narrativeAnalysis }: UniversityC
                                                     Program Profile Insight
                                                 </span>
                                                 <p className="text-neutral-500 text-xs italic font-medium leading-relaxed">
-                                                    This tier-one provider emphasizes rigorous technical board training alongside dynamic industrial mentorship placements.
+                                                    This provider emphasizes rigorous technical board training alongside dynamic industrial mentorship placements.
                                                 </p>
                                             </div>
                                         )}

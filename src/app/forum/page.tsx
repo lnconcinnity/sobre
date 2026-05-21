@@ -30,20 +30,8 @@ export default function ForumPage() {
     const { posts, loading: postsLoading } = usePosts();
     const [time, setTime] = useState(() => Date.now());
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const indicatorRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
-
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const target = e.currentTarget;
-        if (!indicatorRef.current) return;
-        
-        const maxScroll = target.scrollWidth - target.clientWidth;
-        if (maxScroll <= 0) return;
-        const scrollPercentage = target.scrollLeft / maxScroll;
-        const dynamicValue = Math.round((1 - scrollPercentage) * 100);
-        indicatorRef.current.style.setProperty("--indicator-tx", `${dynamicValue}%`);
-    };
 
     useEffect(() => {
         const timer = setInterval(() => setTime(Date.now()), 1000);
@@ -164,11 +152,11 @@ export default function ForumPage() {
                     <div className="relative flex items-center bg-white rounded-2xl border border-neutral-200 shadow-sm max-w-full sm:w-auto overflow-hidden">
                         <div
                             ref={scrollContainerRef}
-                            onScroll={handleScroll}
-                            data-speed="1"
-                            data-lag="0"
                             className="flex p-1.5 overflow-x-auto no-scrollbar max-w-full sm:w-auto self-start lg:self-end"
-                            style={{ touchAction: "pan-x" }} 
+                            style={{ 
+                                touchAction: "pan-x",
+                                WebkitOverflowScrolling: "touch",
+                            }}
                         >
                             {[
                                 { id: "latest", label: "Latest", icon: Clock },
@@ -192,16 +180,6 @@ export default function ForumPage() {
                                     </button>
                                 );
                             })}
-                        </div>
-                        <div 
-                            ref={indicatorRef}
-                            className="sm:hidden absolute right-3 pointer-events-none p-1.5 rounded-lg bg-neutral-50 border border-neutral-200 text-neutral-700 flex items-center justify-center transition-transform shadow-xs"
-                            style={{
-                                transform: "translateX(var(--indicator-tx, 100%))",
-                                willChange: "transform"
-                            }}
-                        >
-                            <ArrowLeftRight size={10} className="animate-pulse" />
                         </div>
                     </div>
                 </div>

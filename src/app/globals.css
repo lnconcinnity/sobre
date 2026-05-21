@@ -16,6 +16,10 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+  .no-scrollbar button {
+    touch-action: pan-x;
+    -webkit-tap-highlight-color: transparent;
+  }
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;

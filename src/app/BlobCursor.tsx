@@ -21,8 +21,8 @@ export default function BlobCursor() {
         if (typeof window === "undefined") return;
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const isMobileScreen = window.innerWidth < 640;
-        
-        if (isTouchDevice || isMobileScreen) {
+        const isMobile = isTouchDevice || isMobileScreen;
+        if (isMobile) {
             if (cursorRef.current) cursorRef.current.style.display = "none";
             return;
         }
@@ -80,8 +80,10 @@ export default function BlobCursor() {
             }
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("scroll", handleScroll, { passive: true });
+        if (!isMobile) {
+            window.addEventListener("mousemove", handleMouseMove);
+            window.addEventListener("scroll", handleScroll, { passive: true });
+        }
 
         const initializedElements = new WeakSet();
         const PADDING = 50;
@@ -196,20 +198,22 @@ export default function BlobCursor() {
             el.addEventListener("mouseleave", handleOnLeave);
         };
 
-        const observer = new MutationObserver(() => {
-            if (s.isLatched && s.latchedEl && !document.contains(s.latchedEl)) {
-                forceReleaseMagnet(s.latchedEl, s.latchedIsLocked);
-            }
+        let observer: MutationObserver;
+        if (!isTouchDevice) {
+            observer = new MutationObserver(() => {
+                if (s.isLatched && s.latchedEl && !document.contains(s.latchedEl)) {
+                    forceReleaseMagnet(s.latchedEl, s.latchedIsLocked);
+                }
+                document.querySelectorAll(".magnetic").forEach((el) => initMagnet(el as HTMLElement));
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
             document.querySelectorAll(".magnetic").forEach((el) => initMagnet(el as HTMLElement));
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-        document.querySelectorAll(".magnetic").forEach((el) => initMagnet(el as HTMLElement));
+        }
 
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("scroll", handleScroll);
-            observer.disconnect();
+            observer?.disconnect();
             gsap.ticker.remove(tick);
             
             if (s.latchedEl) {

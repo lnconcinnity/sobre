@@ -22,7 +22,10 @@ export default function SmoothScroller({ smooth = 1.5, children }: { smooth?: nu
             content: content.current,
             smooth: smooth,
             effects: true,
-            normalizeScroll: true,
+            normalizeScroll: {
+                allowNestedScroll: true,
+                lockAxis: true,
+            },
         });
         setSmoother(smoother);
         smoother.scrollTop();

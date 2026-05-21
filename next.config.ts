@@ -13,6 +13,11 @@ const nextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: `/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/**`,
       },
+      // temporary addition (im tired)
+      {
+        protocol: 'https',
+        hostname: 'national-u.edu.ph'
+      }
     ]
   },
 };
