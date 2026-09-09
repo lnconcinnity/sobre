@@ -137,7 +137,7 @@ export async function POST(req: Request) {
                 { role: "system", content: systemPrompt },
                 { role: "user", content: "Analyze this dataset: " + JSON.stringify(profile) },
             ],
-            model: "openai/gpt-oss-120b",
+            model: "gpt-oss-120b",
             temperature: 0.4,
             response_format: { type: "json_object" },
         });
