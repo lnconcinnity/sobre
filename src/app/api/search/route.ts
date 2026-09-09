@@ -51,7 +51,7 @@ export async function GET(req: Request) {
                 { role: "user", content: `Query: "${userQuery}"` }
             ],
             temperature: 0,
-            model: "gpt-oss-120b",
+            model: "openai/gpt-oss-120b",
             response_format: { type: "json_object" },
         });
 
