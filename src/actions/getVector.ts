@@ -1,16 +1,23 @@
-import { groq } from "./getGroq"
+import { groq } from "./getGroq";
 
 export async function getVector(text: string) {
     try {
-        const response = await groq.embeddings.create({
-            model: "nomic-embed-text-v1_5",
-            input: text,
-        });
-
-        const fullEmbedding = response.data[0].embedding;
-        return fullEmbedding.slice(0, 384) as number[];
+        const response = await fetch(
+            "https://huggingface.co",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ inputs: text }),
+            }
+        );
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`HF Status ${response.status}: ${errText}`);
+        }
+        const output = await response.json();
+        return Array.isArray(output) ? (output as number[]) : (output as number[]);
     } catch (error) {
-        console.error("Groq Embedding Error:", error);
+        console.error("HF Anonymous Inference Error:", error);
         throw error;
     }
 }
