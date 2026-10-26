@@ -7,7 +7,6 @@ export async function getVector(text: string) {
         const output = await client.featureExtraction({
             model: "sentence-transformers/all-MiniLM-L6-v2",
             inputs: text,
-            provider: "hf-inference",
         });
         return Array.isArray(output[0]) ? (output[0] as number[]) : (output as number[]);
     } catch (error) {
