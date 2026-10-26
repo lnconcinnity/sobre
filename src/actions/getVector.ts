@@ -1,16 +1,26 @@
-import { InferenceClient  } from "@huggingface/inference";
-
-const client = new InferenceClient (process.env.HUGGINGFACE_TOKEN);
-
 export async function getVector(text: string) {
     try {
-        const output = await client.featureExtraction({
-            model: "sentence-transformers/all-MiniLM-L6-v2",
-            inputs: text,
+        const response = await fetch("https://api.groq.com/openai/v1/embeddings", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                input: text,
+                model: "nomic-embed-text-v1_5"
+            })
         });
-        return Array.isArray(output[0]) ? (output[0] as number[]) : (output as number[]);
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Groq Status ${response.status}: ${errText}`);
+        }
+
+        const json = await response.json();
+        return json.data[0].embedding as number[];
     } catch (error) {
-        console.error("HF Inference Error:", error);
+        console.error("Groq Embedding Error:", error);
         throw error;
     }
 }
